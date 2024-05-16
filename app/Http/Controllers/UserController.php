@@ -56,6 +56,10 @@ class UserController extends Controller
     public function activateOrDeactivate(Request $request){
         $user = User::findOrFail($request->input('id'));
         $user->activated = $request->input('value_checkbox');
+        $user->email_verified_at = null;
+        if ( $request->input('value_checkbox') === '1' ){
+            $user->email_verified_at = date('Y-m-d H:i:s');
+        }
         $user->save();
         return response()->json([
             'user' => $user
