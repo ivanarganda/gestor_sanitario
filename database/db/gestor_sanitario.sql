@@ -20,44 +20,6 @@ SET time_zone = "+00:00";
 --
 -- Database: `gestor_sanitario`
 --
-CREATE DATABASE IF NOT EXISTS `gestor_sanitario` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
-USE `gestor_sanitario`;
-
-DELIMITER $$
---
--- Procedures
---
-DROP PROCEDURE IF EXISTS `change_engine_for_all_tables`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `change_engine_for_all_tables` (IN `dbName` VARCHAR(64), IN `newEngine` VARCHAR(64))   BEGIN
-    DECLARE done INT DEFAULT 0;
-    DECLARE tableName VARCHAR(64);
-    DECLARE alterStmt VARCHAR(255);
-
-    DECLARE cur CURSOR FOR 
-    SELECT table_name 
-    FROM information_schema.tables 
-    WHERE table_schema = dbName AND table_type = 'BASE TABLE';
-
-    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
-
-    OPEN cur;
-
-    read_loop: LOOP
-        FETCH cur INTO tableName;
-        IF done THEN
-            LEAVE read_loop;
-        END IF;
-
-        SET @alterStmt = CONCAT('ALTER TABLE ', dbName, '.', tableName, ' ENGINE = ', newEngine);
-        PREPARE stmt FROM @alterStmt;
-        EXECUTE stmt;
-        DEALLOCATE PREPARE stmt;
-    END LOOP;
-
-    CLOSE cur;
-END$$
-
-DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -79,7 +41,7 @@ CREATE TABLE IF NOT EXISTS `documents` (
   `autor` int NOT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_gd_sanitarios` (`autor`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -98,7 +60,7 @@ CREATE TABLE IF NOT EXISTS `sessions` (
   `status` enum('0','1') NOT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_session_users` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `sessions`
@@ -142,15 +104,15 @@ CREATE TABLE IF NOT EXISTS `users` (
   `email_verified_at` datetime DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
-  `colegiate` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `phone` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `colegiate` varchar(50) CHARACTER SET utf8 DEFAULT NULL,
+  `phone` varchar(15) CHARACTER SET utf8 DEFAULT NULL,
   `role` enum('staff','medico','user','enfermero') NOT NULL,
   `activated` enum('0','1') NOT NULL DEFAULT '0',
-  `remember_token` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `remember_token` varchar(200) CHARACTER SET utf8 DEFAULT NULL,
   `session_id` varchar(200) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `users`
