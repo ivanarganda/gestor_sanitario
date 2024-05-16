@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\MailController;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,3 +31,5 @@ Route::get('/sessions/{user_name?}/{session_status?}', [UserController::class, '
 Route::get('/login', [AuthController::class, 'index'] )->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+
+Route::get('/sendEmail', [MailController::class, 'sendMail'])->name('sendMail');

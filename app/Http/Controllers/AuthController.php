@@ -18,6 +18,9 @@ class AuthController extends Controller
     
     public function login(Request $request)
     {
+
+        try {
+
         // Validation rules for email and password
         $validator = Validator::make($request->all(), [
             'email' => ['required', 'email', 'regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/'],
@@ -57,9 +60,9 @@ class AuthController extends Controller
                 $logged = false;
             }
             // Check if user is activated and email is verified
-            if ($user->activated != '1' && $user->email_verified_at == null) {
+            if ($user->activated != '1' || $user->email_verified_at == null) {
                 $type = 'user';
-                $errorMessage = 'Not user registered';
+                $errorMessage = 'Not user activated, please, contact with administrator';
                 $logged = false;
             }
 
@@ -116,6 +119,9 @@ class AuthController extends Controller
 
             return redirect()->intended('/');
 
+        }
+        } catch (\Exception $e) {
+            return back()->withErrors(['email' => 'Error on log in. Try it later']);
         }
         
     }

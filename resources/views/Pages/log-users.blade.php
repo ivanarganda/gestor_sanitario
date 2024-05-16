@@ -77,22 +77,23 @@
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
                 @foreach($users as $user)
-                    @foreach($user->sessions as $session)
                         <tr>
                             <td class="py-4 px-6 whitespace-nowrap">{{ $user->name }}</td>
-                            <td class="py-4 px-6 whitespace-nowrap">{{ $session->ip_address }}</td>
-                            <td class="py-4 px-6 whitespace-nowrap">{{ $session->login_time }}</td>
-                            <td class="py-4 px-6 whitespace-nowrap">{{ $session->logout_time }}</td>
-                            <td class="py-4 px-6 whitespace-nowrap">{{ calculateTotalTime($session->login_time, $session->logout_time) }}</td>
-                            <td class="py-4 px-6 whitespace-nowrap">{{ getStatusSession($session->status) }}</td>
+                            <td class="py-4 px-6 whitespace-nowrap">{{ $user->ip_address }}</td>
+                            <td class="py-4 px-6 whitespace-nowrap">{{ $user->login_time }}</td>
+                            <td class="py-4 px-6 whitespace-nowrap">{{ $user->logout_time }}</td>
+                            <td class="py-4 px-6 whitespace-nowrap">{{ calculateTotalTime($user->login_time, $user->logout_time) }}</td>
+                            <td class="py-4 px-6 whitespace-nowrap">{{ getStatusSession($user->status) }}</td>
                         </tr>
-                    @endforeach
                 @endforeach
             </tbody>
         </table>
         <div class="mt-12">
+            <!-- Manual Pagination Links -->
             {!!$pagination!!}
         </div>
     </div>
+    
+    
 </div>
 @include('../Layouts/footer')

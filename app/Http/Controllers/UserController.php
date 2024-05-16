@@ -18,7 +18,6 @@ class UserController extends Controller
 
     public function register( Request $request){
 
-        DB::enableQueryLog();
         $user = User::where('email', $request->input('email'))->first();
 
         if ( $user === null ){
@@ -34,12 +33,23 @@ class UserController extends Controller
 
             $this->registerUser($data);
 
-            return redirect()->back();
+            return redirect()->back()->with(['user'=>'Usuario registrado correctamente']);;
         }
 
         return back()->withErrors(['user' => 'Could not be processed because user already registered']);
 
-        Log::info(DB::getQueryLog());
+    }
+
+    public function update(Request $request, string $id)
+    {
+
+        $user = User::findOrFail($id);
+
+        $user->update($request->all());
+        
+        $user->save();
+
+        return redirect()->intended('/users/')->with(['user'=>'Cambios realizados correctamente']);
 
     }
 
@@ -60,34 +70,24 @@ class UserController extends Controller
 
     public function getSessions(Request $request)
     {
-        DB::enableQueryLog();
-        // Start building the query
-        $query = User::query();
-
-        // Apply filters based on request inputs
+        $query = DB::table('users as u')
+            ->leftJoin('sessions as s', 'u.id', '=', 's.user_id')
+            ->select('u.name as name', 's.ip_address as ip_address', 's.login_time as login_time', 's.logout_time as logout_time', 's.status as status');
+    
         if ($request->filled('user_name')) {
-            $query->where('name', 'like', '%' . $request->input('user_name') . '%');
+            $query->where('u.name', 'like', '%' . $request->input('user_name') . '%');
         }
-
+    
         if ($request->filled('session_status')) {
-            // Check the value of session_status for debugging
             $sessionStatus = $request->input('session_status');
-            
-            $query->whereHas('sessions', function ($q) use ($sessionStatus) {
-                // Apply the session status filter 
-                $q->where('status', $sessionStatus); 
-            });
+            $query->where('s.status', $sessionStatus);
         }
-
-        // Load the users with their sessions and paginate the results
-        $users = $query->with('sessions')->paginate(5);
-
-        Log::info(DB::getQueryLog());
-
+    
+        $users = $query->paginate(10);
+        
         // Generate pagination data
         $pagination = $this->generatePagination($users);
-
-        // Return the view with users and pagination data
+    
         return view('Pages.log-users', compact('users', 'pagination'));
     }
 
