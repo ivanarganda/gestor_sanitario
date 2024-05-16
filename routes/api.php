@@ -21,4 +21,4 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::post('/users', [UserController::class, 'checkUser']);
-
+Route::post('/users/changeStatus', [UserController::class, 'activateOrDeactivate']);

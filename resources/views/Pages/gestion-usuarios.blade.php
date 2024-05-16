@@ -158,7 +158,7 @@
                             </a>
                             <span class="cursor-pointer bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Borrar</span>
                             <div class="toggle-wrapper blue">  
-                                <input class="toggle-checkbox" id="checkbox_{{$key}}" {{$user->activated == '0' ? '' : 'checked'}} value="" type="checkbox">
+                                <input class="checkbox toggle-checkbox" id="{{$user->id}}" {{$user->activated == '0' ? '' : 'checked'}} value="{{$user->activated}}" type="checkbox">
                                 <div class="toggle-container">
                                     <div class="toggle-ball"></div>
                                 </div>
