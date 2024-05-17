@@ -2,6 +2,7 @@
 <form method="POST" action="/users/create" class="w-1/4 mb-8 bg-white p-6 m-auto rounded-lg shadow-md">
     @csrf
     <div class="grid grid-cols-1 flex flex-col space-y-4 w-full">
+        <input type="hidden" id="typeForm" value="register" />
         <div>
             <label for="name" class="block w-full text-sm font-medium text-gray-700">Asignar grupo/rol</label>
             <select required id="modal_select_rol" name="role" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
@@ -48,6 +49,7 @@
     <form method="POST" action="/users/update/{{$data_user->id}}" class="w-1/4 mb-8 bg-white p-6 m-auto rounded-lg shadow-md">
         @csrf
         <div class="grid grid-cols-1 flex flex-col space-y-4 w-full">
+            <input type="hidden" id="typeForm" value="edit" />
             <div>
                 <label for="name" class="block w-full text-sm font-medium text-gray-700">Asignar grupo/rol</label>
                 <select required id="modal_select_rol" name="role" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
