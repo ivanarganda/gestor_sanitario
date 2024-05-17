@@ -14,26 +14,28 @@ class Controller extends BaseController
 
     public function generatePagination( $data ){
         
-        return "<nav role='navigation' aria-label='pagination' class='mx-auto flex w-full justify-center mt-6'>
+        return "
+        <nav role='navigation' aria-label='pagination' class='mx-auto flex w-full justify-center mt-6'>
             <ul class='flex flex-row items-center gap-1'>
                 <!-- Previous page link -->
                 <li>
-                    <a href='{$data->previousPageUrl()}' class='pagination-link'>&laquo; Previous</a>
+                    <a href='{$data->previousPageUrl()}' class='pagination-link" . ($data->onFirstPage() ? ' disabled' : '') . "'>&laquo; Previous</a>
                 </li>
                 <!-- Pagination elements -->
-                " . 
-                implode('', array_map(function($i) use ($data) {
-                    return "<li>
-                                <a href='{$data->url($i)}' class='pagination-link" . ($i == $data->currentPage() ? ' active' : '') . "'>$i</a>
-                            </li>";
+                " . implode('', array_map(function($i) use ($data) {
+                    return "
+                        <li>
+                            <a href='{$data->url($i)}' class='pagination-link" . ($i == $data->currentPage() ? ' active' : '') . "'>$i</a>
+                        </li>";
                 }, range(1, $data->lastPage()))) . "
                 <!-- Next page link -->
                 <li>
-                    <a href='{$data->nextPageUrl()}' class='pagination-link'>Next &raquo;</a>
+                    <a href='{$data->nextPageUrl()}' class='pagination-link" . ($data->hasMorePages() ? '' : ' disabled') . "'>Next &raquo;</a>
                 </li>
             </ul>
-        </nav>";
-
+        </nav>
+        ";
+        
     }
 
     public function registerSession( $data ){
