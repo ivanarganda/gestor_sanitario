@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class CheckLogin
 {
@@ -17,8 +18,15 @@ class CheckLogin
      */
     public function handle(Request $request, Closure $next)
     {
-        if (!Auth::check()){
-            return redirect()->intended('/');
+        if (!$request) {
+            Log::error('Request object is null');
+            abort(400, 'Bad Request: Request object is null');
         }
+    
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
+    
+        return $next($request);
     }
 }
