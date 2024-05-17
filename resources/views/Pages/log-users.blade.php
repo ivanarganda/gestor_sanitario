@@ -38,7 +38,7 @@
         return $format;
     }
 @endphp
-<div class="container mx-auto py-8">
+<div class="container mt-20 mx-auto py-8">
     <div class="flex space-x-10 justify-center p-2">
         <a href="{{url('/')}}">
             <svg class="h-8 w-8 pt-2 text-center text-zinc-600" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
