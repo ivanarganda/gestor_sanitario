@@ -14,7 +14,7 @@ Route::middleware(['check.login'])->group(function () {
     Route::get('/users/delete/{id}', [UserController::class, 'delete']);
     Route::get('/users/settings', [UserController::class, 'settingsUser'])->name('settingsUser');
     Route::get('/sessions/{user_name?}/{session_status?}', [UserController::class, 'getSessions'])->name('sessions');
-    Route::get('/sendEmail', [MailController::class, 'sendMail'])->name('sendMail');
+    Route::get('/sendEmail/{type}/{email}/{subject}', [MailController::class, 'sendMail'])->name('sendMail');
 });
 
 Route::get('/login', function(){

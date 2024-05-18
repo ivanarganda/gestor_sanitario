@@ -18,7 +18,7 @@ class MailerService extends Mailable
      *
      * @return void
      */
-    public function __construct($message)
+    public function __construct($message = null)
     {
         $this->message = $message;
     }
