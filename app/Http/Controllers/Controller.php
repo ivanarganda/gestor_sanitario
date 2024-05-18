@@ -15,6 +15,56 @@ class Controller extends BaseController
     public function generatePagination( $data ){
         
         return "
+        <style>
+                /* Estilos para animar los botones de paginación */
+            .pagination a {
+                display: inline-block;
+                padding: 0.5rem 1rem;
+                margin: 0 0.25rem;
+                border-radius: 0.375rem;
+                background-color: #f3f4f6;
+                color: #374151;
+                font-weight: 500;
+                transition: background-color 0.2s ease, color 0.2s ease;
+            }
+            .pagination a:hover {
+                background-color: #3b82f6;
+                color: #ffffff;
+            }
+            .pagination .active a {
+                background-color: #3b82f6;
+                color: #ffffff;
+            }
+
+            .pagination-link {
+                display: inline-block;
+                padding: 0.5rem 1rem;
+                margin: 0 0.25rem;
+                border-radius: 0.375rem;
+                background-color: #f3f4f6;
+                color: #374151;
+                font-weight: 500;
+                transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+                text-decoration: none;
+            }
+
+            .pagination-link:hover {
+                background-color: #3b82f6;
+                color: #ffffff;
+                transform: scale(1);
+            }
+
+            .pagination-link.active {
+                background-color: #3b82f6;
+                color: #ffffff;
+            }
+
+            .pagination-link.disabled {
+                background-color: #e5e7eb;
+                color: #9ca3af;
+                cursor: not-allowed;
+            }
+        </style>
         <nav role='navigation' aria-label='pagination' class='mx-auto flex w-full justify-center mt-6'>
             <ul class='flex flex-row items-center gap-1'>
                 <!-- Previous page link -->

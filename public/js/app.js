@@ -1,4 +1,5 @@
-const accessButtons = document.querySelectorAll("#access_buttons div button");
+const accessButtons = document.querySelectorAll("#access_buttons div");
+const accessButtonsSpan = document.querySelectorAll("#access_buttons div span");
 const button_back_access = $("#arrow_button_back_access");
 
 // Filtro de usuario de la tabla de sesiones
@@ -13,15 +14,20 @@ const boton_cerrar_modal_crear_usuario = document.querySelector("#modal_boton_ca
 // Coger todos los checkboxes de las acciones de la tabla de usuarios
 const checkboxes = document.querySelectorAll("#table-users tbody tr #actions .checkbox");
 
-accessButtons.forEach(button => {
-    $(button).on('click', (event) => {
-        event.preventDefault();
-        // Le asignamos el valor del input access
-        $("#access").val($("#" + event.target.id).data('value'));
-        $("#input_labels").show();
-        $("#access_buttons").hide();
+const loadButtons = ( element )=>{
+    element.forEach(button => {
+        $(button).on('click', (event) => {
+            console.log(event.target.id);
+            // Le asignamos el valor del input access
+            $("#access").val($("#" + event.target.id).data('value'));
+            $("#input_labels").show();
+            $("#access_buttons").hide();
+        });
     });
-});
+    
+}
+loadButtons( accessButtons );
+loadButtons( accessButtonsSpan );
 
 $(button_back_access).on('click', (event) => {
     event.preventDefault();
@@ -31,10 +37,10 @@ $(button_back_access).on('click', (event) => {
     $("#message_errors").hide();
 });
 
-const input_email = document?.querySelector('#email');
+const input_email = document.querySelector('#email');
 
 if (input_email) {
-    input_email.addEventListener('input', (event) => {
+    input_email.addEventListener('keyup', (event) => {
         let typeForm = document.querySelector("#typeForm").value;
         let data = new FormData();
         data.append('email', event.target.value);
@@ -91,6 +97,7 @@ checkboxes.forEach((checkbox, pos) => {
         if (event.target.checked) {
             value_checkbox = '1';
         }
+        console.log( value_checkbox );
         let data = new FormData();
         data.append('id', user_id);
         data.append('value_checkbox', value_checkbox);

@@ -71,3 +71,16 @@ tbody tr.loaded {
     opacity: 1;
     transform: translateY(0);
 }
+
+tbody tr {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+tbody tr:hover {
+    background-color: #f9fafb;
+}
+tbody tr.loaded {
+    opacity: 1;
+    transform: translateY(0);
+}
