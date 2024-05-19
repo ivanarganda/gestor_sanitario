@@ -11,16 +11,16 @@ class MailerService extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $message;
+    public $data;
 
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct($message = null)
+    public function __construct( $data )
     {
-        $this->message = $message;
+        $this->data = $data;
     }
 
     /**
@@ -30,8 +30,20 @@ class MailerService extends Mailable
      */
     public function build()
     {
-        return $this->view('Mail.message',[
-            'message' => $this->message
-        ]);
+        $view = '';
+        $subject = '';
+
+        if ( $this->data->type == 'requestCredentials' ){
+            $view = 'Mail.requestCredentials';
+            $subject = 'Solicitud '.$this->data->request.' para ' . $this->data->destinatary;
+        }
+        if ( $this->data->type =='sendCredentials' ){
+            $view = 'Mail.sendCredentials';
+            $subject = 'Credenciales plataforma para el usuario ' . $this->data->email;
+        }
+
+        return $this->view( $view ,[
+            'data' => $this->data
+        ])->from('igv.gestorsanitario@igvdeveloper.com')->subject( $subject );
     }
 }

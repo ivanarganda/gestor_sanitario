@@ -17,6 +17,35 @@
         return json_encode($data);
     }
 @endphp
+@if(session('success'))
+
+    <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4" role="alert">
+        <div class="flex justify-center items-center">
+            <div class="mx-2">
+                <svg class="h-6 w-6 text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <div class="text-lg">
+                {{ session('success') }}
+            </div>
+        </div>
+    </div>
+@endif
+@if(session('error'))
+    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">
+        <div class="flex justify-center items-center">
+            <div class="mx-2">
+                <svg class="h-6 w-6 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <div class="text-lg">
+                {{ session('error') }}
+            </div>
+        </div>
+    </div>
+@endif
 <div class="container mx-auto py-8">
     <div class="flex items-center justify-center p-2 mb-8">
         <a href="{{url('/')}}" class="flex items-center text-gray-600 hover:text-gray-800">
@@ -59,32 +88,38 @@
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-                @foreach($users as $key => $user)
-                    @if($user->role === 'staff')
-                        @continue
-                    @endif
-                    <tr class="transition duration-300 ease-in-out hover:bg-gray-100">
-                        <td class="py-4 px-6 whitespace-nowrap text-gray-500 font-weight-light">{{ $user->name }}</td>
-                        <td class="py-4 px-6 whitespace-nowrap text-gray-500 font-weight-light">{{ $user->role }}</td>
-                        <td class="py-4 px-6 whitespace-nowrap text-gray-500 font-weight-light">{{ $user->phone }}</td>
-                        <td class="py-4 px-6 whitespace-nowrap text-gray-500 font-weight-light">{{ $user->email }}</td>
-                        <td class="py-4 px-6 whitespace-nowrap text-gray-500 font-weight-light">{{ $user->created_at }}</td>
-                        <td id="actions" class="py-4 px-6 whitespace-nowrap flex space-x-2 items-center">
-                            <a href="/users?edit_user={{base64_encode(encodeData($user))}}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded shadow transition duration-300 transform hover:scale-105">
-                                Editar
-                            </a>
-                            <button class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded shadow transition duration-300 transform hover:scale-105">
-                                Borrar
-                            </button>
-                            <div class="toggle-wrapper blue">  
-                                <input class="checkbox toggle-checkbox" id="{{$user->id}}" {{$user->activated == '0' ? '' : 'checked'}} value="{{$user->activated}}" type="checkbox">
-                                <div class="toggle-container">
-                                    <div class="toggle-ball"></div>
-                                </div>
-                            </div>
-                        </td>
+                @if ( count( $users ) === 1 )
+                    <tr colspan="6" class="transition duration-300 ease-in-out hover:bg-gray-100">
+                        <td colspan="6" class="py-4 px-6 whitespace-nowrap text-center text-gray-500 font-weight-light">No hay usuarios registrados</td>
                     </tr>
-                @endforeach
+                @else
+                    @foreach($users as $key => $user)
+                        @if($user->role === 'staff')
+                            @continue
+                        @endif
+                        <tr class="transition duration-300 ease-in-out hover:bg-gray-100">
+                            <td class="py-4 px-6 whitespace-nowrap text-gray-500 font-weight-light">{{ $user->name }}</td>
+                            <td class="py-4 px-6 whitespace-nowrap text-gray-500 font-weight-light">{{ $user->role }}</td>
+                            <td class="py-4 px-6 whitespace-nowrap text-gray-500 font-weight-light">{{ $user->phone }}</td>
+                            <td class="py-4 px-6 whitespace-nowrap text-gray-500 font-weight-light">{{ $user->email }}</td>
+                            <td class="py-4 px-6 whitespace-nowrap text-gray-500 font-weight-light">{{ $user->created_at }}</td>
+                            <td id="actions" class="py-4 px-6 whitespace-nowrap flex space-x-2 items-center">
+                                <a href="/users?edit_user={{base64_encode(encodeData($user))}}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded shadow transition duration-300 transform hover:scale-105">
+                                    Editar
+                                </a>
+                                <a href="{{url('/users/delete/'.$user->id.'')}}" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded shadow transition duration-300 transform hover:scale-105">
+                                    Borrar
+                                </a>
+                                <div class="toggle-wrapper blue">  
+                                    <input class="checkbox toggle-checkbox" id="{{$user->id}}" {{$user->activated == '0' ? '' : 'checked'}} value="{{$user->activated}}" type="checkbox">
+                                    <div class="toggle-container">
+                                        <div class="toggle-ball"></div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforeach
+                @endif
             </tbody>
         </table>
         <div class="mt-8 flex justify-center space-x-2">

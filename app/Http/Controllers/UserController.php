@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Models\User;
 use App\Models\Session;
+use \Illuminate\Database\QueryException;
+
 use DateTime;
 
 class UserController extends Controller
@@ -31,26 +34,59 @@ class UserController extends Controller
                 'role' => $request->input('role'),
             ];
 
+            $json_data = [
+                'type' => 'sendCredentials',
+                'email' => $request->input('email'),
+                'password' => $request->input('password')
+            ];
+
             $this->registerUser($data);
 
-            return redirect()->back()->with(['user'=>'Usuario registrado correctamente']);;
+            return redirect()->intended('/send/' . base64_encode(json_encode($json_data)) . '/');
+
         }
 
-        return back()->withErrors(['user' => 'Could not be processed because user already registered']);
+        return redirect()->back()->with(['error' => 'Could not be processed because user already registered']);
 
+    }
+    public function request_credentials( Request $request ){
+        dd( $request );
+        die();
+    }
+
+    public function user_registered(){
+
+        return redirect()->intended('/users')->with(['success'=>'User registered successfully']);
+        
     }
 
     public function update(Request $request, string $id)
     {
 
+        try {
+
+            $user = User::findOrFail($id);
+
+            $user->update($request->all());
+            
+            $user->save();
+            
+            return redirect()->intended('/users')->with(['success'=>'Made changes succesfully']);
+
+        } catch ( QueryException $e){
+
+            if ( preg_match( '/Integrity constraint violation: 1062 Duplicate entry/' , $e->getMessage() ) ){
+                return redirect()->back()->with(['error' => 'Not made changes due to another user with same email']);
+            }
+
+        }
+
+    }
+
+    public function delete(string $id){
         $user = User::findOrFail($id);
-
-        $user->update($request->all());
-        
-        $user->save();
-
-        return redirect()->intended('/users/')->with(['user'=>'Cambios realizados correctamente']);
-
+        $user->delete();
+        return redirect()->intended('/users')->with(['success'=>'User deleted successfully']);
     }
 
     public function activateOrDeactivate(Request $request){
@@ -79,6 +115,10 @@ class UserController extends Controller
                 'user' => $user
             ]);
         }
+    }
+
+    public function send( $data ){
+        return view( 'send' , ['data' => $data] );
     }
 
     public function getSessions(Request $request)
@@ -115,6 +155,10 @@ class UserController extends Controller
 
         // Return the view with users and pagination data
         return view('Pages.gestion-usuarios', compact('users', 'pagination'));
+    }
+
+    public function form_request_credentials(){
+        return view('Pages.request-credentials');
     }
         
 }

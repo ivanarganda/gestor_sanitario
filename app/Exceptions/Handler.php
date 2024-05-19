@@ -2,7 +2,9 @@
 
 namespace App\Exceptions;
 
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use App\Exceptions\MailException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -37,5 +39,23 @@ class Handler extends ExceptionHandler
         $this->reportable(function (Throwable $e) {
             //
         });
+    }
+
+    public function render($request, Throwable $exception)
+    {
+        if ($exception instanceof MethodNotAllowedHttpException) {
+            return response()->json([
+                'type' => 'Error',
+                'message' => $exception->getMessage()
+            ], 405); // 405 is the HTTP status code for Method Not Allowed
+        }
+        if ($exception instanceof MailException) {
+            return response()->json([
+                'type' => 'Error',
+                'message' => $exception->getMessage()
+            ], 500); // 500 is the HTTP status code for Internal Server Error
+        }
+
+        return parent::render($request, $exception);
     }
 }

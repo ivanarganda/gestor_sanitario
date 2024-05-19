@@ -88,6 +88,15 @@ class Controller extends BaseController
         
     }
 
+    public function getCurrentProtocol(){
+         // Check if the HTTPS key is set and is 'on' or '1'
+        if (isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] === 'on' || $_SERVER['HTTPS'] == 1)) {
+            return 'https';
+        }
+        // If not, default to 'http'
+        return 'http';
+    }
+
     public function registerSession( $data ){
         DB::table('sessions')->insert( $data );
     }
