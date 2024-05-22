@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Models\User;
 use App\Models\Session;
+use App\Models\Administrator;
 use \Illuminate\Database\QueryException;
 
 use DateTime;
@@ -42,6 +43,19 @@ class UserController extends Controller
 
             $this->registerUser($data);
 
+            if ( $request->input('role') === 'staff' ){
+                $data_user = User::where('email', $request->input('email'))->first();
+                $admin = new Administrator();
+                $admin->id = $data_user->id;
+                $admin->name = $request->input('name');
+                $admin->email = $request->input('email');
+                $admin->save();
+                $user = User::findOrFail($data_user->id);
+                $user->activated = '1';
+                $user->email_verified_at = date('Y-m-d H:i:s');
+                $user->save();
+            }
+
             return redirect()->intended('/send/' . base64_encode(json_encode($json_data)) . '/');
 
         }
@@ -67,6 +81,26 @@ class UserController extends Controller
 
             $user = User::findOrFail($id);
 
+            if ( $user->role =='staff' ){
+                if ( Administrator::where('id',$id)->exists() ){
+                    $admin = Administrator::findOrFail($id);
+                    $admin->name = $request->input('name');
+                    $admin->email = $request->input('email');
+                    $admin->update($request->all());
+                } else {
+                    $admin = new Administrator();
+                    $admin->user_id = $id;
+                    $admin->name = $request->input('name');
+                    $admin->email = $request->input('email');
+                    $admin->save();
+
+                }
+                $user_ = User::findOrFail($id);
+                $user_->activated = '1';
+                $user_->email_verified_at = date('Y-m-d H:i:s');
+                $user_->save();
+            }
+
             $user->update($request->all());
             
             $user->save();
@@ -77,6 +111,8 @@ class UserController extends Controller
 
             if ( preg_match( '/Integrity constraint violation: 1062 Duplicate entry/' , $e->getMessage() ) ){
                 return redirect()->back()->with(['error' => 'Not made changes due to another user with same email']);
+            } else {
+                return redirect()->back()->with(['error' => $e->getMessage()]);
             }
 
         }
@@ -85,6 +121,12 @@ class UserController extends Controller
 
     public function delete(string $id){
         $user = User::findOrFail($id);
+
+        if ( $user->role == 'staff' ){
+            $admin = Administrator::findOrFail($id);
+            $admin->delete();
+        }
+
         $user->delete();
         return redirect()->intended('/users')->with(['success'=>'User deleted successfully']);
     }

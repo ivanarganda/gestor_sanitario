@@ -121,11 +121,18 @@ class AuthController extends Controller
         
     }
 
-    public function logout()
+    public function logout( Request $request )
     {
         DB::table('sessions')->where('user_agent', Auth::user()->session_id)
        ->update(['logout_time' => now()]);
         Auth::logout();
+        // Invalidate the session.
+        $request->session()->invalidate();
+
+        // Regenerate the CSRF token to avoid token mismatch errors.
+        $request->session()->regenerateToken();
+
+        // Redirect to the intended location or the homepage.
         return redirect()->intended('/');
     }
 

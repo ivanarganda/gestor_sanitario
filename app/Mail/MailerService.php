@@ -35,7 +35,7 @@ class MailerService extends Mailable
 
         if ( $this->data->type == 'requestCredentials' ){
             $view = 'Mail.requestCredentials';
-            $subject = 'Solicitud '.$this->data->request.' para ' . $this->data->destinatary;
+            $subject = 'Solicitud '.$this->data->request_type.' para ' . $this->data->destinatary;
         }
         if ( $this->data->type =='sendCredentials' ){
             $view = 'Mail.sendCredentials';

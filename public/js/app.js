@@ -9,10 +9,47 @@ const user_input = document.querySelector("#user_name");
 const boton_abrir_modal_crear_usuario = document.querySelector("#addUser");
 const boton_cerrar_modal_crear_usuario = document.querySelector("#modal_boton_cancelar");
 
-// Tabla de usuarios
+// Notificaciones badget solicitud credenciales administrador
+const badget_notification = document.querySelector("#badget_notification");
+const badget_text_notification = document.querySelector("#badget_text_notification");
 
 // Coger todos los checkboxes de las acciones de la tabla de usuarios
 const checkboxes = document.querySelectorAll("#table-users tbody tr #actions .checkbox");
+const loadNotifications = async () => {
+    try {
+        let response = await fetch(`${window.location.protocol}//${window.location.host}/api/notifications/${$("#badget_id_admin").text()}`, {
+            method: 'GET',
+            mode: 'cors',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        let data = await response.json();
+
+        new Promise((resolve, reject) => {
+            resolve(data);
+        }).then( (data) =>{
+            if (badget_text_notification) {
+                if ( data.notifications[0].notifications === 0 ){
+                    $(badget_notification).hide();
+                } else {
+                    $(badget_notification).show();
+                    $(badget_text_notification).html(data.notifications[0].notifications); 
+                }
+                
+            } else {
+                console.error("Element with ID 'badget_notification' not found.");
+            }
+        })
+    } catch (error) {
+        console.error('Error loading notifications:', error);
+    }
+}
 
 const loadButtons = ( element )=>{
     element.forEach(button => {
@@ -111,3 +148,8 @@ checkboxes.forEach((checkbox, pos) => {
         });
     });
 });
+
+// Load notifications from administrator
+if ( badget_notification ) {
+    setInterval(()=>loadNotifications(),1500);
+}

@@ -1,6 +1,7 @@
 @include('../Layouts/header')
-@php 
-    function encodeData($user){
+@include('../Helpers/commonMethods')
+@php
+    function encodeData($user) {
         $data = [
             'id' => $user->id,
             'name' => $user->name,
@@ -10,55 +11,39 @@
             'email' => $user->email,
         ];
 
-        if ( $user->role === 'medico' || $user->role === 'enfermero'){
+        if (in_array($user->role, ['medico', 'enfermero'])) {
             $data['colegiate'] = $user->colegiate;
         }
 
         return json_encode($data);
     }
 @endphp
-@if(session('success'))
 
-    <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4" role="alert">
-        <div class="flex justify-center items-center">
-            <div class="mx-2">
-                <svg class="h-6 w-6 text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-            </div>
-            <div class="text-lg">
-                {{ session('success') }}
-            </div>
-        </div>
-    </div>
-@endif
-@if(session('error'))
-    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">
-        <div class="flex justify-center items-center">
-            <div class="mx-2">
-                <svg class="h-6 w-6 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-            </div>
-            <div class="text-lg">
-                {{ session('error') }}
+@foreach (['success', 'error'] as $msg)
+    @if(session($msg))
+        <div class="bg-{{ $msg == 'success' ? 'green' : 'red' }}-100 border-l-4 border-{{ $msg == 'success' ? 'green' : 'red' }}-500 text-{{ $msg == 'success' ? 'green' : 'red' }}-700 p-4 mb-4" role="alert">
+            <div class="flex justify-center items-center">
+                <div class="mx-2">
+                    <svg class="h-6 w-6 text-{{ $msg == 'success' ? 'green' : 'red' }}-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div class="text-lg">
+                    {{ session($msg) }}
+                </div>
             </div>
         </div>
-    </div>
-@endif
+    @endif
+@endforeach
+
 <div class="container mx-auto py-8">
-    <div class="flex items-center justify-center p-2 mb-8">
-        <a href="{{url('/')}}" class="flex items-center text-gray-600 hover:text-gray-800">
-            <svg class="h-8 w-8" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                <path stroke="none" d="M0 0h24v24H0z" />
-                <path d="M9 13l-4 -4l4 -4m-4 4h11a4 4 0 0 1 0 8h-1" />
-            </svg>
-        </a>
-        <h1 class="text-3xl font-bold ml-4">Gestión de usuarios</h1>
-    </div>
+    @php
+        echo generateTitleSection('Gestion de usuarios');
+    @endphp
     <div id="modal_usuarios">
         @include('../Form/modal-usuario')
     </div>
+
     <!-- Filter Form -->
     <form method="GET" action="{{ route('users') }}" class="max-w-lg mx-auto mb-8 bg-white p-6 rounded-lg shadow-md transition">
         <div class="grid grid-cols-1 gap-4">
@@ -88,30 +73,39 @@
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-                @if ( count( $users ) === 1 )
-                    <tr colspan="6" class="transition duration-300 ease-in-out hover:bg-gray-100">
-                        <td colspan="6" class="py-4 px-6 whitespace-nowrap text-center text-gray-500 font-weight-light">No hay usuarios registrados</td>
+                @if ($users->isEmpty())
+                    <tr>
+                        <td colspan="6" class="py-4 px-6 text-center text-gray-500 font-light">No hay usuarios registrados</td>
                     </tr>
                 @else
-                    @foreach($users as $key => $user)
-                        @if($user->role === 'staff')
-                            @continue
-                        @endif
-                        <tr class="transition duration-300 ease-in-out hover:bg-gray-100">
-                            <td class="py-4 px-6 whitespace-nowrap text-gray-500 font-weight-light">{{ $user->name }}</td>
-                            <td class="py-4 px-6 whitespace-nowrap text-gray-500 font-weight-light">{{ $user->role }}</td>
-                            <td class="py-4 px-6 whitespace-nowrap text-gray-500 font-weight-light">{{ $user->phone }}</td>
-                            <td class="py-4 px-6 whitespace-nowrap text-gray-500 font-weight-light">{{ $user->email }}</td>
-                            <td class="py-4 px-6 whitespace-nowrap text-gray-500 font-weight-light">{{ $user->created_at }}</td>
+                    @foreach ($users as $user)
+                        <tr class="transition {{ $user->role == 'staff' ? 'bg-yellow-100' : '' }} {{ $user->email === Auth::user()->email ? 'bg-yellow-300 shadow-md' : '' }} duration-300 ease-in-out hover:bg-gray-100">
+                            <td class="py-4 px-6 {{ $user->role == 'staff' ? 'flex justify-between items-center space-x-2' : '' }} whitespace-nowrap {{ $user->email === Auth::user()->email ? 'text-blue-500' : 'text-gray-500' }} font-light">
+                                @if ($user->role === 'staff' && $user->email === Auth::user()->email)
+                                    Yo
+                                @else
+                                    {{ $user->name }}
+                                @endif
+                                @if ($user->role === 'staff')
+                                    <svg class="h-10 w-10 text-zinc-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                        <circle cx="12" cy="7" r="4" />
+                                    </svg>
+                                @endif
+                            </td>
+                            <td class="py-4 px-6 whitespace-nowrap {{ $user->email === Auth::user()->email ? 'text-orange' : 'text-gray-500' }} font-light">{{ $user->role }}</td>
+                            <td class="py-4 px-6 whitespace-nowrap {{ $user->email === Auth::user()->email ? 'text-orange' : 'text-gray-500' }} font-light">{{ $user->phone }}</td>
+                            <td class="py-4 px-6 whitespace-nowrap {{ $user->email === Auth::user()->email ? 'text-orange' : 'text-gray-500' }} font-light">{{ $user->email }}</td>
+                            <td class="py-4 px-6 whitespace-nowrap {{ $user->email === Auth::user()->email ? 'text-orange' : 'text-gray-500' }} font-light">{{ $user->created_at }}</td>
                             <td id="actions" class="py-4 px-6 whitespace-nowrap flex space-x-2 items-center">
-                                <a href="/users?edit_user={{base64_encode(encodeData($user))}}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded shadow transition duration-300 transform hover:scale-105">
+                                <a href="/users?edit_user={{ base64_encode(encodeData($user)) }}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded shadow transition duration-300 transform hover:scale-105">
                                     Editar
                                 </a>
-                                <a href="{{url('/users/delete/'.$user->id.'')}}" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded shadow transition duration-300 transform hover:scale-105">
+                                <a href="{{ url('/users/delete/'.$user->id) }}" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded shadow transition duration-300 transform hover:scale-105">
                                     Borrar
                                 </a>
-                                <div class="toggle-wrapper blue">  
-                                    <input class="checkbox toggle-checkbox" id="{{$user->id}}" {{$user->activated == '0' ? '' : 'checked'}} value="{{$user->activated}}" type="checkbox">
+                                <div class="toggle-wrapper blue">
+                                    <input class="checkbox toggle-checkbox" id="{{ $user->id }}" {{ $user->activated ? 'checked' : '' }} type="checkbox">
                                     <div class="toggle-container">
                                         <div class="toggle-ball"></div>
                                     </div>
@@ -127,15 +121,15 @@
         </div>
     </div>
 </div>
+
 @include('../Layouts/footer')
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const rows = document.querySelectorAll('tbody tr');
-        rows.forEach((row, index) => {
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('tbody tr').forEach((row, index) => {
             setTimeout(() => {
                 row.classList.add('loaded');
-            }, index * 100); // Delay para cada fila
+            }, index * 100);
         });
     });
 </script>

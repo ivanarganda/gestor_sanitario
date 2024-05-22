@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\WindowSizeController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\MailController;
+use App\Http\Controllers\NotificationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,7 +22,11 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+
+Route::get('/notifications/{id}', [NotificationController::class, 'getNotificationsAdmin'])->middleware('notification');
 Route::post('/sendEmail', [MailController::class, 'sendMail']);
-// Route::post('/sendEmail', [MailController::class, 'sendMail'])->middleware('email.notification');
 Route::post('/users', [UserController::class, 'checkUser']);
 Route::post('/users/changeStatus', [UserController::class, 'activateOrDeactivate']);
+
+
+

@@ -7,9 +7,10 @@
                 <label for="role" class="block text-sm font-medium text-gray-700">Asignar grupo/rol</label>
                 <select required id="modal_select_rol" name="role" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
                     <option value=""></option>
-                    <option value="user">Usuario</option>
+                    <option value="user">Empleado</option>
                     <option value="enfermero">Enfermero</option>
                     <option value="medico">Médico</option>
+                    <option value="staff">Administrador</option>
                 </select>
             </div>
             <div>
@@ -55,9 +56,10 @@
                     <label for="role" class="block text-sm font-medium text-gray-700">Asignar grupo/rol</label>
                     <select required id="modal_select_rol" name="role" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
                         <option value=""></option>
-                        <option value="user" {{$data_user->role == "user" ? 'selected' : ''}}>Usuario</option>
+                        <option value="user" {{$data_user->role == "user" ? 'selected' : ''}}>Empleado</option>
                         <option value="enfermero" {{$data_user->role == "enfermero" ? 'selected' : ''}}>Enfermero</option>
                         <option value="medico" {{$data_user->role == "medico" ? 'selected' : ''}}>Médico</option>
+                        <option value="staff" {{$data_user->role == "staff" ? 'selected' : ''}}>Administrador</option>
                     </select>
                 </div>
                 <div>

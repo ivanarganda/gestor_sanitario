@@ -19,7 +19,7 @@
 </style>
 <div class="w-full md:w-2/4 lg:w-2/3 xl:w-2/4 mx-auto mt-40 transition-all duration-500 ease-in-out">
     <div class="w-full bg-gray-100 dark:bg-gray-800 bg-opacity-80 p-8 rounded-lg shadow-md transition-all duration-500 ease-in-out">
-        <form action="{{ route('login') }}" id="loginForm" method="post" class="grid gap-8 w-full transition-all duration-500 ease-in-out">
+        <form action="{{ url('/login') }}" id="loginForm" method="POST" class="grid gap-8 w-full transition-all duration-500 ease-in-out">
             @csrf
 
             @error('user')

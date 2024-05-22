@@ -104,5 +104,62 @@ class Controller extends BaseController
     public function registerUser( $data ){
         DB::table('users')->insert( $data );
     }
+
+    public function getNotificationsByAdmin( $id ){
+
+        $results = DB::table(DB::raw("(SELECT a.id AS administrator_id, a.name AS administrator_name, a.email AS administrator_email 
+                              FROM requestnotifications rn 
+                              LEFT JOIN administrators a ON rn.destinatary = a.id WHERE a.id = $id AND rn.viewed = '0') AS Q1"))
+            ->select(DB::raw("CONCAT(Q1.administrator_email, '(', Q1.administrator_email, ')') AS administrator_fullname"))
+            ->selectRaw("COUNT(*) AS notifications")
+            ->groupBy('Q1.administrator_id')
+            ->get();
+
+        return $results;
+
+    }
+
+    public function getNotificationsByAdmin_view( $id ){
+
+        $results = DB::table('users as u')
+        ->leftJoin('requestnotifications as rn', 'u.id', '=', 'rn.emisor')
+        ->select(
+            'u.name as emisor_user',
+            'u.email as emisor_email',
+            'rn.id as request_id',
+            'rn.request_type as request_type',
+            'rn.title as request_title',
+            'rn.description as description',
+            'rn.created_at as created_at',
+            'rn.status as status',
+            'rn.viewed as viewed',
+            'rn.rubbised as recycled'
+        )
+        ->where('rn.destinatary', $id)
+        ->paginate(5);
+        
+        return $results;
+
+    }
+
+    public function getDetailsNotification( $id ){
+        $results = DB::table('users as u')
+        ->leftJoin('requestnotifications as rn', 'u.id', '=', 'rn.emisor')
+        ->select(
+            'u.name as emisor_user',
+            'u.email as emisor_email',
+            'rn.id as request_id',
+            'rn.request_type as request_type',
+            'rn.title as request_title',
+            'rn.description as description',
+            'rn.created_at as created_at',
+            'rn.status as status',
+            'rn.rubbised as recycled'
+        )
+        ->where('rn.id', $id)
+        ->paginate(5);
+        
+        return $results;
+    }
     
 }
