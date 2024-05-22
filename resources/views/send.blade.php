@@ -33,5 +33,11 @@
             window.location = '/request-created';
         }
         console.log(data);
+    }).catch(() => {
+      if ( @json($type) == 'sendCredentials' ){
+            window.location = '/user-registered/error';
+        } else {
+            window.location = '/request-created/error';
+        }
     });
 </script>

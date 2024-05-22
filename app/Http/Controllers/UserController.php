@@ -63,14 +63,15 @@ class UserController extends Controller
         return redirect()->back()->with(['error' => 'Could not be processed because user already registered']);
 
     }
-    public function request_credentials( Request $request ){
-        dd( $request );
-        die();
-    }
 
-    public function user_registered(){
+    public function user_registered( $error = null){
 
-        return redirect()->intended('/users')->with(['success'=>'User registered successfully']);
+        if ( $error ) {
+            return redirect()->intended('/users')->with(['error'=>'User registered successfully but issues forwarding credentials by email to user']);
+        } else {
+            return redirect()->intended('/users')->with(['success'=>'User registered successfully and sent credentials to user']);
+        }
+        
         
     }
 
@@ -159,10 +160,6 @@ class UserController extends Controller
         }
     }
 
-    public function send( $data ){
-        return view( 'send' , ['data' => $data] );
-    }
-
     public function getSessions(Request $request)
     {
         $query = DB::table('users as u')
@@ -197,10 +194,6 @@ class UserController extends Controller
 
         // Return the view with users and pagination data
         return view('Pages.gestion-usuarios', compact('users', 'pagination'));
-    }
-
-    public function form_request_credentials(){
-        return view('Pages.request-credentials');
     }
         
 }

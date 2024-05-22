@@ -18,24 +18,6 @@
         return json_encode($data);
     }
 @endphp
-
-@foreach (['success', 'error'] as $msg)
-    @if(session($msg))
-        <div class="bg-{{ $msg == 'success' ? 'green' : 'red' }}-100 border-l-4 border-{{ $msg == 'success' ? 'green' : 'red' }}-500 text-{{ $msg == 'success' ? 'green' : 'red' }}-700 p-4 mb-4" role="alert">
-            <div class="flex justify-center items-center">
-                <div class="mx-2">
-                    <svg class="h-6 w-6 text-{{ $msg == 'success' ? 'green' : 'red' }}-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </div>
-                <div class="text-lg">
-                    {{ session($msg) }}
-                </div>
-            </div>
-        </div>
-    @endif
-@endforeach
-
 <div class="container mx-auto py-8">
     @php
         echo generateTitleSection('Gestion de usuarios');

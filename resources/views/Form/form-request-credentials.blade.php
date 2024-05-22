@@ -1,31 +1,36 @@
-<form method="POST" action="/users/create" class="m-auto mb-8 bg-white p-6 rounded-lg shadow-md transition">
+<form method="POST" action="/form_request_credentials/create" class="bg-white p-8 rounded-lg shadow-md transition transform">
     @csrf
-    <div class="grid grid-cols-1 gap-4 w-full">
-        <input type="hidden" id="typeForm" value="register" />
+    <input type="hidden" id="typeForm" value="register" />
+    <div class="grid grid-cols-1 gap-6">
+        <input type="hidden" name="emisor" value="{{Auth::user()->id}}">
         <div>
-            <label for="role" class="block text-sm font-medium text-gray-700">Seleccione el tipo de solicitud</label>
-            <select required id="modal_select_rol" name="role" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+            <label for="role" class="block text-sm font-medium text-gray-700">Tipo de solicitud</label>
+            <select required id="modal_select_rol" name="request_type" class="mt-1 block w-full border-gray-300 rounded-md shadow-md focus:border-blue-500 focus:ring focus:ring-blue-200 transition">
                 <option value=""></option>
-                <option value="change_pass">Cambio contraseña</option>
-                <option value="change_user">Cambio de usuario</option>
-                <option value="change_group">Cambio de grupo</option>
+                <option value="change_password">Cambio de contraseña</option>
+                <option value="change_name_user">Cambio de nombre de usuario</option>
+                <option value="change_role">Cambio de grupo</option>
             </select>
         </div>
         <div>
-            <label for="name" class="block text-sm font-medium text-gray-700">Usuario</label>
-            <input required type="text" name="name" id="name" class="pr-2 outline-none mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+            <label for="request_email" class="block text-sm font-medium text-gray-700">Administrador</label>
+            <select required id="modal_select_rol" name="destinatary" class="mt-1 block w-full border-gray-300 rounded-md shadow-md focus:border-blue-500 focus:ring focus:ring-blue-200 transition">
+                <option value=""></option>
+                @foreach ( $resultsAdmin as $result )
+                    <option value="{{$result->id}}">{{$result->email}}</option>
+                @endforeach
+            </select>
         </div>
         <div>
-            <label for="request_email" class="block text-sm font-medium text-gray-700">Email</label>
-            <input type="email" name="email" id="request_email" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" title="Please enter a valid email address" class="pr-2 outline-none mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+            <label for="request_content" class="block text-sm font-medium text-gray-700">Titulo</label>
+            <input type="text" name="title" required placeholder="Describe your request here" class="mt-1 block w-full border-gray-300 rounded-md shadow-md focus:border-blue-500 focus:ring focus:ring-blue-200 transition"></textarea>
         </div>
         <div>
-            <label for="request_content" class="block text-sm font-medium text-gray-700">Describe la solicitud</label>
-            <textarea name="message" id="request_change_content" required class="pr-2 outline-none mt-1 block w-full border-gray-300 rounded-md shadow-sm" ></textarea>
+            <label for="request_content" class="block text-sm font-medium text-gray-700">Descripción</label>
+            <textarea name="description" rows="10" required placeholder="Describe your request here" class="mt-1 block w-full border-gray-300 rounded-md shadow-md focus:border-blue-500 focus:ring focus:ring-blue-200 transition"></textarea>
         </div>
     </div>
-    <div class="flex justify-around space-x-3 mt-10">
-        <input type="submit" value="Enviar solicitud" class="cursor-pointer bg-green-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow transition duration-300 transform hover:scale-105">
-        </input>
+    <div class="flex justify-around mt-8">
+        <button type="submit" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded shadow transition transform hover:scale-105">Enviar solicitud</button>
     </div>
 </form>

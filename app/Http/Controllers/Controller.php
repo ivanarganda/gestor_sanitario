@@ -12,6 +12,11 @@ class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
+    // Function to send data by email both request, warnings, forward, etc...
+    public function send( $data ){
+        return view( 'send' , ['data' => $data] );
+    }
+
     public function generatePagination( $data ){
         
         return "
@@ -104,6 +109,10 @@ class Controller extends BaseController
     public function registerUser( $data ){
         DB::table('users')->insert( $data );
     }
+    public function getAdministratorsEmail(){
+        $results = DB::table('administrators')->get();
+        return $results;
+    }
 
     public function getNotificationsByAdmin( $id ){
 
@@ -136,7 +145,7 @@ class Controller extends BaseController
             'rn.rubbised as recycled'
         )
         ->where('rn.destinatary', $id)
-        ->paginate(5);
+        ->paginate(3);
         
         return $results;
 
@@ -149,6 +158,7 @@ class Controller extends BaseController
             'u.name as emisor_user',
             'u.email as emisor_email',
             'rn.id as request_id',
+            'rn.emisor as emisor',
             'rn.request_type as request_type',
             'rn.title as request_title',
             'rn.description as description',
@@ -157,7 +167,7 @@ class Controller extends BaseController
             'rn.rubbised as recycled'
         )
         ->where('rn.id', $id)
-        ->paginate(5);
+        ->get();
         
         return $results;
     }

@@ -8,4 +8,21 @@ use Illuminate\Database\Eloquent\Model;
 class Requestnotification extends Model
 {
     use HasFactory;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+
+    protected $fillable = [
+        '_token',
+        'title',
+        'description',
+        'request_type',
+        'emisor',
+        'destinatary',
+
+    ];
+
 }

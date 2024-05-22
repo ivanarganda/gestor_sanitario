@@ -31,12 +31,17 @@
                             <p class="text-gray-400 text-xs mt-1">Hace {{calculateTotalTime($details->created_at, now() , 'full')}}</p>
                         </div>
                     </div>
-                    <div class="w-full pb-5 flex items-center m-auto text-gray-400 text-xs mt-1">
+                    <div class="w-full pb-5 flex justify-center items-center m-auto text-gray-400 text-xs mt-1">
                         <span class="text-center">{{$details->description}}</span>
                     </div>
-                    <div class="flex pt-2 justify-center space-x-2">
-                        <a class="bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg shadow hover:bg-blue-600">Aprobar</a>
-                        <a class="bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg shadow hover:bg-blue-600">Denegar</a>
+                    <div id="botones_accion_detalles_notificacion" class="flex pt-2 justify-center space-x-2">
+                        <span hidden id="email_soliciter">{{$user_soliciter}}</span>
+                        <span hidden id="email_admin">{{$user_admin}}</span>
+                        <span hidden id="title">{{$details->request_title}}</span>
+                        <span hidden id="identity">{{$details->request_id}}</span>
+                        <span hidden id="message">{{$details->description}}</span>
+                        <a id="boton_notificacion_aprobar_{{$details->request_id}}" data-value="{{$details->request_id}}" class="bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg shadow hover:bg-blue-600">Aprobar</a>
+                        <a id="boton_notificacion_denegar_{{$details->request_id}}" data-value="{{$details->request_id}}" class="bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg shadow hover:bg-blue-600">Denegar</a>
                     </div>
                 </div>
             @endforeach

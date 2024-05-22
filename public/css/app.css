@@ -1,5 +1,5 @@
 /* GENERAL */
-input[type="text"] , input[type="email"] , input[type="password"] , input[type="search"] , input[type="tel"] {
+input[type="text"] , input[type="email"] , input[type="password"] , input[type="search"] , input[type="tel"] , textarea , select {
     outline: none;
     display: block;
     padding-left: 0.2rem;

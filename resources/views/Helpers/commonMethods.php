@@ -62,3 +62,7 @@ function calculateTotalTime( $date1 , $date2 , $full = false ){
 
     return $format;
 }
+
+function cutText( $text ){
+    return strlen($text) > 400? substr($text, 0, 400).'...' : $text;
+}
