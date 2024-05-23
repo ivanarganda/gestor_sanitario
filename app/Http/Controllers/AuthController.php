@@ -19,6 +19,12 @@ class AuthController extends Controller
     public function login(Request $request)
     {
 
+        $session_data = [
+            'svgAccess'=> $request->input('svgAccess'),
+            'bgTitle'=> $request->input('bgTitle'),
+            'bgImage'=> $request->input('bgImage')
+        ];
+
         // Validation rules for email and password
         $validator = Validator::make($request->all(), [
             'email' => ['required', 'email', 'regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/'],
@@ -27,14 +33,14 @@ class AuthController extends Controller
 
         // If validation fails, return back with errors  
         if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator);
+            return redirect()->back()->withErrors($validator)->withInput()->with($session_data);
         }
 
         // Retrieve user based on access type
         $user = User::where('email', $request->email)->first();
 
         if (!$user){
-            return redirect()->back()->withErrors(['email' => 'User does not exist']);
+            return redirect()->back()->withErrors(['email' => 'User does not exist'])->withInput()->with($session_data);
         }
 
         // Let´s gonna check wether session gone wrong or success
@@ -89,7 +95,7 @@ class AuthController extends Controller
                     'status' => '0'
                 ]);
 
-                return back()->withErrors([$type => $errorMessage]);
+                return back()->withErrors([$type => $errorMessage])->withInput()->with($session_data);
 
             } else {
 

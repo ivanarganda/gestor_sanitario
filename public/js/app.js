@@ -55,27 +55,73 @@ const loadNotifications = async () => {
     }
 }
 
-const loadButtons = ( element )=>{
-    element.forEach(button => {
+const svgAccess = {
+    "buttonAccessAdmin": `<svg class="h-20 w-20 mx-auto pt-4 text-center" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="Admin Access">
+                            <path stroke="none" d="M0 0h24v24H0z"/>
+                            <path d="M3 21v-4a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v4" />
+                            <circle cx="12" cy="7" r="4" />
+                          </svg>`,
+    "buttonAccessMEDATS": `<svg class="h-20 w-20 mx-auto pt-4 text-center" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="MEDATS Access">
+                            <path stroke="none" d="M0 0h24v24H0z"/>
+                            <path d="M10 12l2 -2m0 0l2 -2m-2 2l2 2m-2 -2l-2 2m5 2v4h4a1 1 0 0 0 1 -1v-3a1 1 0 0 0 -1 -1h-4z" />
+                            <path d="M14 15v4a1 1 0 0 1 -1 1h-3a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h3a1 1 0 0 1 1 1z" />
+                            <path d="M14 8v-2a2 2 0 1 0 -4 0v2" />
+                          </svg>`,
+    "buttonAccessUser": `<svg class="h-20 w-20 mx-auto pt-4 text-center" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="User Access">
+                            <path stroke="none" d="M0 0h24v24H0z"/>
+                            <path d="M5 7a2 2 0 1 1 4 0a2 2 0 1 1 -4 0" />
+                            <path d="M5 21v-4a4 4 0 0 1 4 -4h6a4 4 0 0 1 4 4v4" />
+                            <circle cx="12" cy="7" r="4" />
+                          </svg>`
+};
+
+const backgroundAccess = {
+    "buttonAccessAdmin": "bg-yellow-400",
+    "buttonAccessMEDATS": "bg-green-400",
+    "buttonAccessUser": "bg-blue-400"
+};
+
+const iconAccess = {
+    "buttonAccessAdmin": "bg-yellow-600",
+    "buttonAccessMEDATS": "bg-green-600",
+    "buttonAccessUser": "bg-blue-600"
+};
+
+const loadButtons = (elements) => {
+    $("#input_labels").hide();
+    elements.forEach(button => {
         $(button).on('click', (event) => {
-            console.log(event.target.id);
-            // Le asignamos el valor del input access
-            $("#access").val($("#" + event.target.id).data('value'));
-            $("#input_labels").show();
-            $("#access_buttons").hide();
+            event.preventDefault();
+            const buttonId = button.id;
+            
+            // Assign the value of the input access
+            $("#access").val($(button).data('value'));
+            $("#svgAccess").val(svgAccess[buttonId]);
+            $("#inputs_labels__title").html(svgAccess[buttonId]).removeClass().addClass(`w-24 h-24 m-auto mb-8 ${iconAccess[buttonId]}`);
+            $("#input_labels__image").removeClass().addClass(`w-full ${backgroundAccess[buttonId]}`);
+            $("#bg-title").val(iconAccess[buttonId]);
+            $("#bg-image").val(backgroundAccess[buttonId]);
+            $("#input_labels").slideDown();
+            $("#input_labels__image").show();
+            // $("#access_buttons").hide();
         });
     });
-    
 }
+
 loadButtons( accessButtons );
 loadButtons( accessButtonsSpan );
 
 $(button_back_access).on('click', (event) => {
     event.preventDefault();
     $("#access").val('');
-    $("#input_labels").hide();
+    $("#input_labels").slideUp();
+    $("#input_labels__image").hide().removeClass();
     $("#access_buttons").show();
     $("#message_errors").hide();
+    $("#alert").hide();
+    loadButtons( accessButtons );
+    loadButtons( accessButtonsSpan );
+    
 });
 
 const input_email = document.querySelector('#email');
