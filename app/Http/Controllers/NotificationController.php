@@ -180,9 +180,15 @@ class NotificationController extends Controller
     public function recycle( Request $request ){
 
         try {
-            $notification = Requestnotification::findOrFail( $request->input('request_id') );
-            $notification->rubbised = '1';
-            $notification->save();
+
+            if ( $request->input('delete_permanently') == 'si' ){
+                $notification = Requestnotification::findOrFail( $request->input('request_id') );
+                $notification->delete();
+            } else {
+                $notification = Requestnotification::findOrFail( $request->input('request_id') );
+                $notification->rubbised = '1';
+                $notification->save();
+            }
 
             return response()->json([
                 'success' => true,

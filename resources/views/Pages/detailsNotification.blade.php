@@ -5,7 +5,7 @@
     echo generateSidebar(['Trash','Lupe']);
 @endphp
 <div class="container mx-auto my-8">
-    <div class="bg-white shadow-md rounded-lg overflow-hidden">
+    <div class="bg-white shadow-md rounded-lg">
         <div class="flex flex-row justify-center space-x-5 items-center">
             <div class="mt-5">
                 @php
@@ -34,15 +34,17 @@
                         <span hidden id="email_soliciter">{{$user_soliciter}}</span>
                         <span hidden id="email_admin">{{$user_admin}}</span>
                         <span hidden id="title">{{$details->request_title}}</span>
-                        <span id="identity">{{$details->request_id}}</span>
+                        <span hidden id="identity">{{$details->request_id}}</span>
                         <span hidden id="message">{{$details->description}}</span>
-                        <a id="boton_notificacion_aprobar_{{$details->request_id}}" data-value="{{$details->request_id}}" class="cursor-pointer bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg shadow hover:bg-blue-600">Aprobar</a>
-                        <a id="boton_notificacion_denegar_{{$details->request_id}}" data-value="{{$details->request_id}}" class="cursor-pointer bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg shadow hover:bg-blue-600">Denegar</a>
+                        <a id="boton_notificacion_aprobar_{{$details->request_id}}" data-value="{{$details->request_id}}" class="cursor-pointer bg-green-500 text-white font-semibold px-4 py-2 rounded-lg shadow hover:bg-green-600">Aprobar</a>
+                        <a id="boton_notificacion_denegar_{{$details->request_id}}" data-value="{{$details->request_id}}" class="cursor-pointer bg-red-500 text-white font-semibold px-4 py-2 rounded-lg shadow hover:bg-red-600">Denegar</a>
                     </div>
+                    
                 </div>
             @endforeach
             <!-- More notifications can be added similarly -->
         </div>
     </div>
 </div>
+
 @include('../Layouts/footer')

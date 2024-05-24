@@ -5,6 +5,8 @@
     echo generateSidebar(['Trash', 'Lupe']);
 @endphp
 <div class="container mx-auto my-8">
+    <div id="modalBackdrop_confirm_deleete_solicitud">
+    </div>
     <div class="bg-white shadow-md rounded-lg overflow-hidden">
         <div class="flex flex-row justify-center space-x-5 items-center">
             <div class="mt-5">
@@ -65,8 +67,10 @@
                             <a id="boton_mas_detalles" class="{{$notification->rubbised == '1' ? 'hidden' : ''}} cursor-pointer bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg shadow hover:bg-blue-600">Mas detalles</a>
                             <a id="{{$notification->request_id}}" class="botones_restaurar cursor-pointer bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg shadow hover:bg-blue-600">Restaurar</a>
                             @else
-                            <a id="{{$notification->request_id}}" class="botones_reciclar cursor-pointer bg-red-500 text-white font-semibold px-4 py-2 rounded-lg shadow hover:bg-red-600">Borrar</a>
-                            <a id="{{$notification->request_id}}" class="botones_mas_detalles cursor-pointer bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg shadow hover:bg-blue-600">Mas detalles</a>
+                              <a id="{{$notification->request_id}}" class="botones_reciclar cursor-pointer bg-red-500 text-white font-semibold px-4 py-2 rounded-lg shadow hover:bg-red-600">
+                                Borrar
+                              </a>
+                            <a id="{{$notification->request_id}}" class="flex items-center botones_mas_detalles cursor-pointer bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg shadow hover:bg-blue-600">Mas detalles</a>
                             @endif
                         </div>
                     </div>

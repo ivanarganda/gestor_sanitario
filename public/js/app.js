@@ -329,22 +329,88 @@ if ( botones_mas_detalles || botones_reciclar || botones_restaurar ){
 
     botones_reciclar.forEach(( boton )=>{
 
-        console.log( boton.id );
         $(boton).click('click',(event)=>{
-            const data = new FormData();
-            data.append('request_id', $('#identity_' + event.target.id ).text());
 
-            fetch(window.location.protocol + '/api/inbox/recycle', {
-                method: 'POST',
-                body: data
+            let request_id = $('#identity_' + event.target.id).text();
+
+            $("#modalBackdrop_confirm_deleete_solicitud").html(`
+                <div class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
+                    <!-- Modal -->
+                    <div class="bg-white rounded-lg shadow-lg w-96">
+                        <!-- Modal Header -->
+                        <div class="flex justify-between items-center border-b p-4">
+                            <h3 class="text-xl font-semibold">Borrar solicitud ${$("#title_"+event.target.id).text()}</h3>
+                            <button id="closeModal" class="text-gray-400 hover:text-gray-600">
+                                &times;
+                            </button>
+                        </div>
+                        <!-- Modal Body -->
+                        <div class="p-4">
+                            <p class="text-gray-600">
+                                ¿Seguro que quieres enviarlo a papelera de reciclaje?.
+                            </p>
+                            <div class="pt-2 flex flex-row items-center">
+                                <input class="w-4 h-4 cursor-pointer border-gray-500 p-2" type="checkbox" id="option_delete_permanently" name="option_delete_permanently"/>
+                                &nbsp;<label for="option_delete_permanently" class="text-gray-600">Eliminar permanentemente</label>
+                            </div>
+                        </div>
+                        
+                        <!-- Modal Footer -->
+                        <div class="flex justify-end border-t p-4">
+                            <button id="cancelBtn" class="bg-gray-500 text-white px-4 py-2 rounded-md mr-2 hover:bg-gray-600">
+                                Cancelar
+                            </button>
+                            <button id="confirmBtn" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
+                                Borrar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            `);
+
+            var delete_permanently = 'no';
+            const closeModal = ()=>{
+                $("#modalBackdrop_confirm_deleete_solicitud").html('');
+            }
+            $("#option_delete_permanently").on('change',()=>{
+                if($("#option_delete_permanently").is(':checked')){
+                    delete_permanently = 'si';
+                } else {
+                    delete_permanently = 'no';
+                }
             })
-            .then(response => response.json())
-            .then(data => {
-                window.location = '/request-recycled/';
+
+            $("#cancelBtn").on('click',( event )=>{
+                event.preventDefault();
+                closeModal();
             })
-            .catch((error) => {
-                window.location = '/request-recycled/error';
-            });
+
+            $("#closeModal").on('click',( event )=>{
+                event.preventDefault();
+                closeModal();
+            })
+
+            $("#confirmBtn").on('click',( event )=>{
+                event.preventDefault();
+                const data = new FormData();
+                data.append('request_id', request_id );
+                data.append('delete_permanently', delete_permanently);
+
+                fetch(window.location.protocol + '/api/inbox/recycle', {
+                    method: 'POST',
+                    body: data
+                })
+                .then(response => response.json())
+                .then(data => {
+                    window.location = '/request-recycled/';
+                })
+                .catch((error) => {
+                    window.location = '/request-recycled/error';
+                });
+
+            })
+
         })
 
     })
