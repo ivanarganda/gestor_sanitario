@@ -9,15 +9,16 @@
         <div class="flex flex-row justify-center space-x-5 items-center">
             <div class="mt-5">
                 @php
-                    echo generateTitleSection('Bandeja de solicitudes');
+                    echo generateTitleSection( isset($_GET['trash']) ? 'Papelera de reciclaje' : 'Bandeja de solicitudes');
                 @endphp 
             </div>
-            <button class="bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg shadow hover:bg-blue-600 flex items-center">
+            <a href='{!!isset($_GET['trash']) ? '/inbox' : '/inbox?trash=true' !!}'   class="bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg shadow hover:bg-blue-600 flex items-center">
                 <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M6 7v13a2 2 0 002 2h8a2 2 0 002-2V7m-5 0V4a2 2 0 10-4 0v3"></path>
                 </svg>
-                Papelera de reciclaje
-            </button>
+                {!!isset($_GET['trash']) ? '<span class="text-2xl">&larr;</span>' : 'Papelera de reciclaje' !!}
+                
+            </a>
         </div>
         <div class="p-6 space-y-6">
             @if (count($notifications) == 0)
@@ -31,14 +32,14 @@
                 </div> 
             @else 
                 @foreach ($notifications as $notification)
-                    <div class="w-full bg-gray-50 p-4 rounded-lg shadow-sm flex flex-col lg:flex-row justify-between items-center space-y-4">
+                    @if ( isset($_GET['trash']) )
+                    <div class="w-full bg-gray-50 p-4 {{$notification->rubbised == 0 ? 'hidden' : ''}} rounded-lg shadow-sm flex flex-col lg:flex-row justify-between items-center space-y-4">
+                    @else 
+                    <div class="w-full bg-gray-50 p-4 {{$notification->rubbised == 1 ? 'hidden' : ''}} rounded-lg shadow-sm flex flex-col lg:flex-row justify-between items-center space-y-4">
+                    @endif
                         <div class="flex items-start">
                             <div class="flex-shrink-0">
-                                <div class="bg-blue-500 h-12 w-12 rounded-full flex items-center justify-center text-white">
-                                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12V8m0 0a4 4 0 10-8 0v4m8 0a4 4 0 01-8 0m8 0v6m-8-6v6"></path>
-                                    </svg>
-                                </div>
+                                {!!getIconAccordingRequest( $notification->request_type )!!}
                             </div>
                             <div class="ml-4">
                                 <p class="text-gray-700 font-medium">
@@ -53,7 +54,20 @@
                             <span>{{ cutText($notification->description) }}</span>
                         </div>
                         <div class="flex justify-center space-x-2">
-                            <a href="{{ url('/inbox/in/'.$notification->request_id) }}" class="bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg shadow hover:bg-blue-600">Mas detalles</a>
+                            <span hidden id="request_id_{{$notification->request_id}}">{{$notification->request_id}}</span>
+                            <span hidden id="email_soliciter_{{$notification->request_id}}">{{$user_soliciter}}</span>
+                            <span hidden id="email_admin_{{$notification->request_id}}">{{$user_admin}}</span>
+                            <span hidden id="title_{{$notification->request_id}}">{{$notification->request_title}}</span>
+                            <span hidden id="identity_{{$notification->request_id}}">{{$notification->request_id}}</span>
+                            <span hidden id="message_{{$notification->request_id}}">{{$notification->description}}</span>
+                            <span hidden id="current_page">{{isset($_GET['page']) ? $_GET['page'] : ''}}</span>
+                            @if (isset($_GET['trash']) )
+                            <a id="boton_mas_detalles" class="{{$notification->rubbised == '1' ? 'hidden' : ''}} cursor-pointer bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg shadow hover:bg-blue-600">Mas detalles</a>
+                            <a id="{{$notification->request_id}}" class="botones_restaurar cursor-pointer bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg shadow hover:bg-blue-600">Restaurar</a>
+                            @else
+                            <a id="{{$notification->request_id}}" class="botones_reciclar cursor-pointer bg-red-500 text-white font-semibold px-4 py-2 rounded-lg shadow hover:bg-red-600">Borrar</a>
+                            <a id="{{$notification->request_id}}" class="botones_mas_detalles cursor-pointer bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg shadow hover:bg-blue-600">Mas detalles</a>
+                            @endif
                         </div>
                     </div>
                 @endforeach

@@ -35,7 +35,7 @@ class MailerService extends Mailable
 
         if ( $this->data->type == 'messageAboutChangesNotification' ){
             $view = 'Mail.message';
-            $subject = 'Hola '.$this->data->destinatary.' tu solicitud '.$this->data->title.' esta en '.$this->data->status.'';
+            $subject = 'Hola '.$this->data->destinatary.' tu solicitud esta en '.$this->data->status.'';
         }
         if ( $this->data->type == 'requestCredentials' ){
             $view = 'Mail.requestCredentials';

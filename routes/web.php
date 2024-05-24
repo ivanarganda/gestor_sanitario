@@ -20,6 +20,8 @@ Route::middleware(['check.login'])->group(function () {
     Route::get('/send/{data}', [Controller::class, 'send']);
     Route::get('/user-registered/{error?}', [UserController::class, 'user_registered']);
     Route::get('/request-created/{error?}', [NotificationController::class, 'request_created']);
+    Route::get('/request-restaured/{error?}', [NotificationController::class, 'request_restaured']);
+    Route::get('/request-recycled/{error?}', [NotificationController::class, 'request_recycled']);
     Route::get('/request-changed/{status}/{error}', [NotificationController::class, 'status_request_changed']);
     Route::get('/sessions/{user_name?}/{session_status?}', [UserController::class, 'getSessions'])->name('sessions');
     Route::get('/form_request_credentials', [NotificationController::class, 'form_request_credentials'])->name('form_request_credentials');

@@ -41,9 +41,14 @@ class NotificationController extends Controller
 
             $notifications = $this->getNotificationsByAdmin_view( Auth::user()->id );
 
+            $user_email = User::where('id', $notifications[0]->emisor )->first();
+
+            $user_soliciter = $user_email->email;
+            $user_admin = Auth::user()->email;
+
             $pagination = $this->generatePagination( $notifications );
 
-            return view('Pages.inbox' , compact( 'notifications' , 'pagination' ) );
+            return view('Pages.inbox' , compact( 'notifications' , 'pagination' , 'user_soliciter' , 'user_admin' ) );
 
 
         } catch ( QueryException $e ){
@@ -92,8 +97,25 @@ class NotificationController extends Controller
         }
     }
 
+    public function request_restaured( $error = null ){
+        if ( $error ){
+            return redirect()->intended('/inbox/error/?trash=true')->with('error', 'Error al intentar restaurarla');
+        }else {
+            return redirect()->intended('/inbox?trash=true')->with('success', 'Solicitud restaurada correctamente');
+        }
+    }
+
+    public function request_recycled( $error = null ){
+        if ( $error ){
+            return redirect()->intended('/inbox?trash=true')->with('error', 'Error al intentar borrar la solicitud');
+        }else {
+            return redirect()->intended('/inbox')->with('success', 'Solicitud borrada correctamente');
+        }
+    }
+
     public function status_request_changed( $status , $error ){
-        if ( $error !== '' ){
+
+        if ( $error !== '-1' ){
             return redirect()->intended('/inbox')->with('error', 'Problema al avisar por email al usuario del estado de la solicitud');
         }else {
             return redirect()->intended('/inbox')->with('success', 'Cambiada la solicitud a '.$status.' corerctamente y avisar por email al usuario del estado del mismo');
@@ -126,6 +148,54 @@ class NotificationController extends Controller
 
             Log::info( $e->getMessage(), LOG_DEBUG );
             return view('Pages.request-credentials')->with('error', $e->getMessage());
+
+        }
+
+    }
+
+    public function restaure( Request $request ){
+
+        try {
+            $notification = Requestnotification::findOrFail( $request->input('request_id') );
+            $notification->rubbised = '0';
+            $notification->save();
+
+            return response()->json([
+                'success' => true,
+                'msg' => 'Successfully changed'
+            ]);
+
+        } catch ( QueryException $e ){
+
+            Log::info( $e->getMessage(), LOG_DEBUG );
+            return response()->json([
+                'success' => false,
+                'msg' => $e->getMessage()
+             ]);
+
+        }
+
+    }
+
+    public function recycle( Request $request ){
+
+        try {
+            $notification = Requestnotification::findOrFail( $request->input('request_id') );
+            $notification->rubbised = '1';
+            $notification->save();
+
+            return response()->json([
+                'success' => true,
+                'msg' => 'Successfully changed'
+            ]);
+
+        } catch ( QueryException $e ){
+
+            Log::info( $e->getMessage(), LOG_DEBUG );
+            return response()->json([
+                'success' => false,
+                'msg' => $e->getMessage()
+             ]);
 
         }
 

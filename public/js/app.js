@@ -19,6 +19,9 @@ const badget_text_notification = document.querySelector("#badget_text_notificati
 
 // Botones de las solicitudes (Mas detalles, aprobar o denegar)
 const botones_accion_detalles_notificacion = document.querySelectorAll("#botones_accion_detalles_notificacion");
+const botones_mas_detalles = document.querySelectorAll(".botones_mas_detalles");
+const botones_restaurar = document.querySelectorAll(".botones_restaurar");
+const botones_reciclar = document.querySelectorAll(".botones_reciclar");
 
 // Todos los checkboxes de las acciones de la tabla de usuarios
 const checkboxes = document.querySelectorAll("#table-users tbody tr #actions .checkbox");
@@ -32,6 +35,33 @@ const loadAnimation = (type, element, styles) => {
         });
     }
 };
+
+// Enviar correo
+const sendEmail = ( type , data ) => {
+
+    console.log( data.status );
+
+    const json_data = new FormData();
+    json_data.append('data', JSON.stringify(data));
+
+    fetch(window.location.protocol + '/api/sendEmail', {
+        method: 'POST',
+        body: json_data
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log(data);
+        if ( type != 'aprobarODenegar' ) {
+            return true;
+        } else {
+            window.location = '/request-changed/' + data.status + '/-1/';
+        }
+    })
+    .catch((error) => {
+        console.log(error);
+        window.location = '/request-changed/' + data.status + '/' + error + '/';
+    });
+}
 
 // Cargar notificaciones
 const loadNotifications = async () => {
@@ -215,7 +245,7 @@ if (botones_accion_detalles_notificacion) {
         $(button).on('click', (event) => {
             event.preventDefault();
             let status = 'aprobado';
-            let request_id = $(`#${event.target.id}`).data('value');
+            let request_id = $(`#identity`).text();
             if (event.target.id.includes('boton_notificacion_denegar')) {
                 status = 'denegado';
             }
@@ -227,38 +257,97 @@ if (botones_accion_detalles_notificacion) {
                 method: 'POST',
                 body: data
             })
-                .then(response => response.json())
-                .then(data => {
-                    var jsonData = {
-                        'type': 'messageAboutChangesNotification',
-                        'email': $('#email_soliciter').text(),
-                        'destinatary': $('#email_soliciter').text(),
-                        'emisor': $('#email_admin').text(),
-                        'title': $('#title').text(),
-                        'message': $('#message').text(),
-                        'id': $('#identity').text(),
-                        'status': status,
-                    };
+            .then(response => response.json())
+            .then(data => {
 
-                    const json_data = new FormData();
-                    json_data.append('data', JSON.stringify(jsonData));
+                var jsonData = {
+                    'type': 'messageAboutChangesNotification',
+                    'email': $('#email_soliciter').text(),
+                    'destinatary': $('#email_soliciter').text(),
+                    'emisor': $('#email_admin').text(),
+                    'title': $('#title').text(),
+                    'message': $('#message').text(),
+                    'id': $('#identity').text(),
+                    'status': status,
+                };
 
-                    fetch(window.location.protocol + '/api/sendEmail', {
-                        method: 'POST',
-                        body: json_data
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            console.log(data);
-                            window.location = '/request-changed/' + status + '//';
-                        })
-                        .catch((error) => {
-                            console.log(error);
-                            window.location = '/request-changed/' + status + '/' + error + '/';
-                        });
-                }).catch((error) => {
-                    console.log(error);
-                });
+                sendEmail( 'aprobarODenegar' , jsonData );
+
+            })
+            .catch((error) => {
+                console.log(error);
+            });
         });
     });
+}
+if ( botones_mas_detalles || botones_reciclar || botones_restaurar ){
+
+    let currentPage = document.querySelector("#current_page");
+
+    botones_mas_detalles.forEach(( boton ) =>{
+        $(boton).on('click', (event) => {
+
+            var jsonData = {
+                'type': 'messageAboutChangesNotification',
+                'email': $('#email_soliciter_' + event.target.id ).text(),
+                'destinatary': $('#email_soliciter_' + event.target.id ).text(),
+                'emisor': $('#email_admin_' + event.target.id ).text(),
+                'title': $('#title_' + event.target.id ).text(),
+                'message': $('#message_' + event.target.id ).text(),
+                'id': $('#identity_' + event.target.id ).text(),
+                'status': 'proceso',
+            };
+    
+            sendEmail( 'masDetalles' , jsonData );
+            
+            window.location = '/inbox/in/'+$("#identity_" + event.target.id).text();
+        
+        })
+    })
+
+    botones_restaurar.forEach(( boton )=>{
+
+        console.log( boton.id );
+        $(boton).click('click',(event)=>{
+            const data = new FormData();
+            data.append('request_id', $('#identity_' + event.target.id ).text());
+
+            fetch(window.location.protocol + '/api/inbox/restaure', {
+                method: 'POST',
+                body: data
+            })
+            .then(response => response.json())
+            .then(data => {
+                window.location = '/request-restaured/';
+            })
+            .catch((error) => {
+                window.location = '/request-restaured/error';
+            });
+        })
+
+    })
+
+    botones_reciclar.forEach(( boton )=>{
+
+        console.log( boton.id );
+        $(boton).click('click',(event)=>{
+            const data = new FormData();
+            data.append('request_id', $('#identity_' + event.target.id ).text());
+
+            fetch(window.location.protocol + '/api/inbox/recycle', {
+                method: 'POST',
+                body: data
+            })
+            .then(response => response.json())
+            .then(data => {
+                window.location = '/request-recycled/';
+            })
+            .catch((error) => {
+                window.location = '/request-recycled/error';
+            });
+        })
+
+    })
+    
+    
 }

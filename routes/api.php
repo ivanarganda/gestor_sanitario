@@ -28,6 +28,8 @@ Route::post('/sendEmail', [MailController::class, 'sendMail']);
 Route::post('/users', [UserController::class, 'checkUser']);
 Route::post('/users/changeStatus', [UserController::class, 'activateOrDeactivate']);
 Route::post('/inbox/changeStatus', [NotificationController::class, 'activateOrDeactivate']);
+Route::post('/inbox/restaure', [NotificationController::class, 'restaure']);
+Route::post('/inbox/recycle', [NotificationController::class, 'recycle']);
 
 
 

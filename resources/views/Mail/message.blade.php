@@ -41,7 +41,10 @@
             <h2>{{ $data->title }}</h2>
         </div>
         <div class="content">
-            <p>Hola {{$data->destinatary}} tu solicitud ha sido de estado ({{$data->id}}): {{$data->status}}</p>
+            <p>Hola {{$data->destinatary}} tu solicitud ({{$data->id}}) esta en {{$data->status}}</p>
+            @if ( $data->status == 'aprobado' )
+                <p>Pronto recibiras las credenciaes actualizadas</p>
+            @endif
             <p>Saludos, {{$data->emisor}}</p>
         </div>
         <div class="footer">

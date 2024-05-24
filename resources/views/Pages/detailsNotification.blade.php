@@ -19,11 +19,7 @@
                 <div class="w-full bg-gray-50 p-4 rounded-lg shadow-sm flex flex-col">
                     <div class="w-full justify-center pb-5 flex items-start">
                         <div class="flex-shrink-0">
-                            <div class="bg-blue-500 h-12 w-12 rounded-full flex items-center justify-center text-white">
-                                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12V8m0 0a4 4 0 10-8 0v4m8 0a4 4 0 01-8 0m8 0v6m-8-6v6"></path>
-                                </svg>
-                            </div>
+                            {!!getIconAccordingRequest( $details->request_type )!!}
                         </div>
                         <div class="ml-4">
                             <p class="text-gray-700 font-medium">Solicitud de {{$details->emisor_user}}</p>
@@ -38,10 +34,10 @@
                         <span hidden id="email_soliciter">{{$user_soliciter}}</span>
                         <span hidden id="email_admin">{{$user_admin}}</span>
                         <span hidden id="title">{{$details->request_title}}</span>
-                        <span hidden id="identity">{{$details->request_id}}</span>
+                        <span id="identity">{{$details->request_id}}</span>
                         <span hidden id="message">{{$details->description}}</span>
-                        <a id="boton_notificacion_aprobar_{{$details->request_id}}" data-value="{{$details->request_id}}" class="bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg shadow hover:bg-blue-600">Aprobar</a>
-                        <a id="boton_notificacion_denegar_{{$details->request_id}}" data-value="{{$details->request_id}}" class="bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg shadow hover:bg-blue-600">Denegar</a>
+                        <a id="boton_notificacion_aprobar_{{$details->request_id}}" data-value="{{$details->request_id}}" class="cursor-pointer bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg shadow hover:bg-blue-600">Aprobar</a>
+                        <a id="boton_notificacion_denegar_{{$details->request_id}}" data-value="{{$details->request_id}}" class="cursor-pointer bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg shadow hover:bg-blue-600">Denegar</a>
                     </div>
                 </div>
             @endforeach

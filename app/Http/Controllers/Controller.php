@@ -136,6 +136,8 @@ class Controller extends BaseController
             'u.name as emisor_user',
             'u.email as emisor_email',
             'rn.id as request_id',
+            'rn.emisor as emisor',
+            'rn.rubbised as rubbised',
             'rn.request_type as request_type',
             'rn.title as request_title',
             'rn.description as description',
