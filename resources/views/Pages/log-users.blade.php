@@ -6,17 +6,11 @@
         echo generateTitleSection('Sesiones de usuarios');
     @endphp
     <!-- Filter Form -->
-    <form method="GET" action="{{ route('sessions') }}" class="max-w-lg mx-auto mb-8 bg-white p-6 rounded-lg shadow-md transform transition duration-500 hover:scale-105 hover:shadow-lg">
-        <div class="mb-4">
-            <label for="user_name" class="block text-lg font-medium text-gray-700">Usuario</label>
-            <input type="text" name="user_name" id="user_name" value="{{ request('user_name') }}" class="outline-none mt-1 block text-gray-400 font-bold w-full border-gray-700 rounded-md shadow-md focus:ring-blue-500 focus:border-blue-500 transition duration-300">
+    <div class="flex w-full flex-col lg:items-center lg:ml-16 lg:flex-row lg:justify-center space-y-3 lg:space-y-0 space-x-3 mt-4 mb-5">
+        <div class="lg:m-auto flex flex-row pl-3 lg:pl-0 justify-center w-full lg:w-full">
+            {!!generateSearch('/sessions' , $search)!!}
         </div>
-        <div class="flex justify-end">
-            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow transition duration-300 transform hover:scale-105">
-                Filtrar
-            </button>
-        </div>
-    </form>
+    </div>
 
     <div class="overflow-x-auto">
         <table class="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
@@ -31,14 +25,14 @@
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-                @foreach($users as $user)
+                @foreach($sessions as $session)
                     <tr class="transition duration-300 ease-in-out hover:bg-gray-100">
-                        <td class="py-4 px-6 whitespace-nowrap">{{ $user->name }}</td>
-                        <td class="py-4 px-6 whitespace-nowrap">{{ $user->ip_address }}</td>
-                        <td class="py-4 px-6 whitespace-nowrap">{{ formatDate($user->login_time) }}</td>
-                        <td class="py-4 px-6 whitespace-nowrap">{{ formatDate($user->logout_time) }}</td>
-                        <td class="py-4 px-6 whitespace-nowrap">{{ calculateTotalTime($user->login_time, $user->logout_time) }}</td>
-                        <td class="py-4 px-6 whitespace-nowrap">{{ getStatusSession($user->status) }}</td>
+                        <td class="py-4 px-6 whitespace-nowrap capitalize">{{ $session->name }}</td>
+                        <td class="py-4 px-6 whitespace-nowrap">{{ $session->ip_address }}</td>
+                        <td class="py-4 px-6 whitespace-nowrap">{{ formatDate($session->login_time) }}</td>
+                        <td class="py-4 px-6 whitespace-nowrap">{{ formatDate($session->logout_time) }}</td>
+                        <td class="py-4 px-6 whitespace-nowrap">{{ calculateTotalTime($session->login_time, $session->logout_time) }}</td>
+                        <td class="py-4 px-6 whitespace-nowrap">{{ $session->status }}</td>
                     </tr>
                 @endforeach
             </tbody>

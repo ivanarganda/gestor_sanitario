@@ -1,3 +1,6 @@
+// Seccion search
+const input_search = document.querySelector('#value_search');
+
 // Selección de elementos
 const accessButtons = document.querySelectorAll("#access_buttons div");
 const accessButtonsSpan = document.querySelectorAll("#access_buttons div span");
@@ -22,6 +25,9 @@ const botones_accion_detalles_notificacion = document.querySelectorAll("#botones
 const botones_mas_detalles = document.querySelectorAll(".botones_mas_detalles");
 const botones_restaurar = document.querySelectorAll(".botones_restaurar");
 const botones_reciclar = document.querySelectorAll(".botones_reciclar");
+
+// Checkbox de las notificaciones de administrador
+const checkbox_requestes = document.querySelectorAll(".checkbox_requestes");
 
 // Todos los checkboxes de las acciones de la tabla de usuarios
 const checkboxes = document.querySelectorAll("#table-users tbody tr #actions .checkbox");
@@ -236,6 +242,11 @@ checkboxes.forEach((checkbox) => {
 
 // Cargar notificaciones de administrador
 if (badget_notification) {
+    let firstLoad = true;
+    if ( firstLoad ){
+        firstLoad = false;
+        loadNotifications()
+    } 
     setInterval(() => loadNotifications(), 1500);
 }
 
@@ -416,4 +427,87 @@ if ( botones_mas_detalles || botones_reciclar || botones_restaurar ){
     })
     
     
+}
+
+if ( checkbox_requestes ){
+    var checkeds = [];
+    var values = [];
+    var items_selected = 0;
+    checkbox_requestes.forEach((checkbox) => {
+        checkeds.push( checkbox.checked );
+        values.push( 0 );
+    });
+    checkbox_requestes.forEach((checkbox, index) => {
+        $('#'+checkbox.id).on('change', (event) => {
+            $("#boton_delete_multiple_requestes").hide();
+            $("#boton_restaure_multiple_requestes").hide();
+            if ( event.target.checked ){
+                items_selected++;
+                checkeds[index] = true;
+                values[index] = event.target.value;
+                $(event.target).parent().parent().addClass('bg-gray-200');
+            } else {
+                checkeds[index] = false;
+                values[index] = 0;
+                items_selected--;
+                $(event.target).parent().parent().removeClass('bg-gray-200');
+            }
+            if ( !checkeds.every((ch) => ch === false) ){
+                $("#boton_restaure_multiple_requestes").show();
+                $("#boton_delete_multiple_requestes").show();
+                $("#items_selected").text(items_selected);
+            } 
+        });
+    });
+
+    $("#boton_delete_multiple_requestes div #boton_delete").on('click', (event) => {
+        event.preventDefault();
+        const data = new FormData();
+        data.append('requestes_id', values );
+        fetch(window.location.protocol + '/api/inbox/multipledelete', {
+            method: 'POST',
+            body: data
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log( data );
+            window.location = '/requestes-deleted/';
+        })
+        .catch((error) => {
+            window.location = '/requestes-deleted/error';
+        });
+    });
+    $("#boton_restaure_multiple_requestes div #boton_delete").on('click', (event) => {
+        event.preventDefault();
+        const data = new FormData();
+        data.append('requestes_id', values );
+        fetch(window.location.protocol + '/api/inbox/multiplerestaure', {
+            method: 'POST',
+            body: data
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log( data );
+            window.location = '/requestes-restaured/';
+        })
+        .catch((error) => {
+            window.location = '/requestes-restaured/error';
+        });
+    });
+}
+
+if ( input_search ){
+
+    const url_search = document.querySelector('#url_search');
+    const btn_search = document.querySelector('#btn_search');
+    const param = window.location.search;
+
+    $(btn_search).on('click',()=>{
+        if ( param.includes('?trash=true') ){
+            window.location = url_search.value.replace(param,'') + '/' + input_search.value + param;
+        } else{
+            window.location = url_search.value + '/' + input_search.value;
+        }
+    })
+
 }

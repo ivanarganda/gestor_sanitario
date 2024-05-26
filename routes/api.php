@@ -30,6 +30,8 @@ Route::post('/users/changeStatus', [UserController::class, 'activateOrDeactivate
 Route::post('/inbox/changeStatus', [NotificationController::class, 'activateOrDeactivate']);
 Route::post('/inbox/restaure', [NotificationController::class, 'restaure']);
 Route::post('/inbox/recycle', [NotificationController::class, 'recycle']);
+Route::post('/inbox/multipledelete', [NotificationController::class, 'multipledelete']);
+Route::post('/inbox/multiplerestaure', [NotificationController::class, 'multiplerestaure']);
 
 
 

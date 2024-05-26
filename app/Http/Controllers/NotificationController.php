@@ -35,20 +35,54 @@ class NotificationController extends Controller
     }
 
     // Get notifications from admin panel for view
-    public function getNotifications(){
+    public function getNotifications( $s = null ){
 
         try {
 
-            $notifications = $this->getNotificationsByAdmin_view( Auth::user()->id );
+            $notifications = $this->getNotificationsByAdmin_view( $s , Auth::user()->id);
 
-            $user_email = User::where('id', $notifications[0]->emisor )->first();
-
-            $user_soliciter = $user_email->email;
+            if ($notifications->isNotEmpty()) {
+                // Retrieve the email of the user who sent the first notification
+                $user_email = User::where('id', $notifications[0]->emisor)->first();
+                
+                $user_soliciter = $user_email->email ?? null;
+            } else {
+                $user_soliciter = null;
+            }
+            
             $user_admin = Auth::user()->email;
+
+            // Generate pagination for notifications
+            $pagination = $this->generatePagination($notifications);
+
+            // Return the inbox view with the necessary data
+            return view('Pages.inbox', [
+                'notifications' => $notifications,
+                'pagination' => $pagination,
+                'user_soliciter' => $user_soliciter,
+                'user_admin' => $user_admin,
+                'search' => $s
+            ]);
+
+        } catch ( QueryException $e ){
+
+            Log::info($e->getMessage(), ['context' => 'Notification Fetch Error']);
+            return view('Pages.inbox')->with('error', $e->getMessage());
+
+        }
+
+    }
+
+    // Get notifications from user panel for view
+    public function getMyRequestes(){
+
+        try {
+
+            $notifications = $this->getMyRequestes_view( Auth::user()->id );
 
             $pagination = $this->generatePagination( $notifications );
 
-            return view('Pages.inbox' , compact( 'notifications' , 'pagination' , 'user_soliciter' , 'user_admin' ) );
+            return view('Pages.myinbox' , [ 'notifications' => $notifications , 'pagination' => $pagination ] );
 
 
         } catch ( QueryException $e ){
@@ -99,32 +133,52 @@ class NotificationController extends Controller
 
     public function request_restaured( $error = null ){
         if ( $error ){
-            return redirect()->intended('/inbox/error/?trash=true')->with('error', 'Error al intentar restaurarla');
+            return redirect()->intended('/inbox/admin/error/?trash=true')->with('error', 'Error al intentar restaurarla');
         }else {
-            return redirect()->intended('/inbox?trash=true')->with('success', 'Solicitud restaurada correctamente');
+            return redirect()->intended('/inbox/admin?trash=true')->with('success', 'Solicitud restaurada correctamente');
+        }
+    }
+
+    public function requestes_deleted( $error = null ){
+        if ( $error ){
+            return redirect()->intended('/inbox/admin/error/?trash=true')->with('error', 'Error al intentar borrar');
+        }else {
+            return redirect()->intended('/inbox/admin?trash=true')->with('success', 'Solicitudes borradas correctamente');
+        }
+    }
+
+    public function requestes_restaured( $error = null ){
+        if ( $error ){
+            return redirect()->intended('/inbox/admin/error/?trash=true')->with('error', 'Error al intentar restaurarlos');
+        }else {
+            return redirect()->intended('/inbox/admin?trash=true')->with('success', 'Solicitudes restauradas correctamente');
         }
     }
 
     public function request_recycled( $error = null ){
         if ( $error ){
-            return redirect()->intended('/inbox?trash=true')->with('error', 'Error al intentar borrar la solicitud');
+            return redirect()->intended('/inbox/admin?trash=true')->with('error', 'Error al intentar borrar la solicitud');
         }else {
-            return redirect()->intended('/inbox')->with('success', 'Solicitud borrada correctamente');
+            return redirect()->intended('/inbox/admin')->with('success', 'Solicitud borrada correctamente');
         }
     }
 
     public function status_request_changed( $status , $error ){
 
         if ( $error !== '-1' ){
-            return redirect()->intended('/inbox')->with('error', 'Problema al avisar por email al usuario del estado de la solicitud');
+            return redirect()->intended('/inbox/admin')->with('error', 'Problema al avisar por email al usuario del estado de la solicitud');
         }else {
-            return redirect()->intended('/inbox')->with('success', 'Cambiada la solicitud a '.$status.' corerctamente y avisar por email al usuario del estado del mismo');
+            return redirect()->intended('/inbox/admin')->with('success', 'Cambiada la solicitud a '.$status.' corerctamente y avisar por email al usuario del estado del mismo');
         }
     }
 
     public function submit_request( Request $request ){
 
         try {
+
+            if ( $request->input('request_type') == '' ){
+                return view('Pages.request-credentials')->with('error', 'Campos vacios');
+            }
         
             $notification = Requestnotification::create($request->all());
 
@@ -204,6 +258,48 @@ class NotificationController extends Controller
              ]);
 
         }
+
+    }
+
+    public function multipledelete( Request $request){
+
+        $ids_requestes = $request->input('requestes_id');
+
+        $ids_requestes = explode(',', $ids_requestes);
+
+        foreach ($ids_requestes as $id ){
+            if ($id!='0'){
+                $notification = Requestnotification::findOrFail( $id );
+                $notification->rubbised = '1';
+                $notification->save();
+            }
+        }
+
+        return response()->json([
+            'success' => $ids_requestes,
+            'msg' => 'Successfully changed'
+        ]);
+
+    }
+
+    public function multiplerestaure( Request $request){
+
+        $ids_requestes = $request->input('requestes_id');
+
+        $ids_requestes = explode(',', $ids_requestes);
+
+        foreach ($ids_requestes as $id ){
+            if ($id!='0'){
+                $notification = Requestnotification::findOrFail( $id );
+                $notification->rubbised = '0';
+                $notification->save();
+            }
+        }
+
+        return response()->json([
+            'success' => $ids_requestes,
+            'msg' => 'Successfully changed'
+        ]);
 
     }
 

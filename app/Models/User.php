@@ -45,6 +45,11 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+    public function setPasswordAttribute($value)
+    {
+        $this->attributes['password'] = base64_encode($value);
+    }
+
     public function sessions(){
         return $this->hasMany(Session::class);
     }

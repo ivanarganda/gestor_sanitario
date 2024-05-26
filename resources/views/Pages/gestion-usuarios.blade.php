@@ -17,6 +17,9 @@
 
         return json_encode($data);
     }
+    function itsme( $email ){
+        return $email === Auth::user()->email;
+    }
 @endphp
 <div class="container mx-auto py-8">
     @php
@@ -25,23 +28,15 @@
     <div id="modal_usuarios">
         @include('../Form/modal-usuario')
     </div>
-
     <!-- Filter Form -->
-    <form method="GET" action="{{ route('users') }}" class="max-w-lg mx-auto mb-8 bg-white p-6 rounded-lg shadow-md transition">
-        <div class="grid grid-cols-1 gap-4">
-            <div>
-                <label for="user_name" class="block text-lg font-medium text-gray-700">Usuario</label>
-                <input type="text" name="user_name" id="user_name" value="{{ request('user_name') }}" class="mt-1 block w-full border-gray-300 rounded-md shadow-md focus:ring-blue-500 focus:border-blue-500 transition duration-300">
-            </div>
+    <div class="flex w-full flex-col lg:items-center lg:ml-16 lg:flex-row lg:justify-center space-y-3 lg:space-y-0 space-x-3 mt-4 mb-5">
+        <div class="lg:m-auto flex flex-row pl-3 lg:pl-0 justify-end w-full lg:w-1/2">
+            {!!generateSearch('/users' , $search)!!}
         </div>
-        <div class="flex justify-around space-x-3 mt-4">
-            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow transition duration-300 transform hover:scale-105">
-                Filtrar
-            </button>
-            <input type="button" onclick="window.location='/users?create_user=true'" id="addUser" value="Añadir usuario" class="cursor-pointer bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded shadow transition duration-300 transform hover:scale-105">
+        <div class="lg:m-auto w-full lg:w-1/2 flex flex-row justify-start">
+            <input type="button" onclick="window.location='/users?create_user=true'" id="addUser" value="Añadir usuario" class="cursor-pointer w-full lg:w-1/4 align-left bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded shadow transition duration-300 transform hover:scale-105">
         </div>
-    </form>
-
+    </div>
     <div class="overflow-x-auto">
         <table id="table-users" class="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
             <thead class="bg-gray-200">
@@ -61,9 +56,9 @@
                     </tr>
                 @else
                     @foreach ($users as $user)
-                        <tr class="transition {{ $user->role == 'staff' ? 'bg-yellow-100' : '' }} {{ $user->email === Auth::user()->email ? 'bg-yellow-300 shadow-md' : '' }} duration-300 ease-in-out hover:bg-gray-100">
-                            <td class="py-4 px-6 {{ $user->role == 'staff' ? 'flex justify-between items-center space-x-2' : '' }} whitespace-nowrap {{ $user->email === Auth::user()->email ? 'text-blue-500' : 'text-gray-500' }} font-light">
-                                @if ($user->role === 'staff' && $user->email === Auth::user()->email)
+                        <tr class="transition {{ $user->role == 'staff' ? 'bg-yellow-100' : '' }} {{ itsme( $user->email ) ? 'bg-yellow-300 shadow-md' : '' }} duration-300 ease-in-out hover:bg-gray-100">
+                            <td class="py-4 px-6 {{ $user->role == 'staff' ? 'flex justify-between items-center space-x-2' : '' }} whitespace-nowrap {{ itsme( $user->email ) ? 'text-blue-500' : 'text-gray-500' }} font-light">
+                                @if ($user->role === 'staff' && itsme( $user->email ))
                                     Yo
                                 @else
                                     {{ $user->name }}
@@ -75,10 +70,10 @@
                                     </svg>
                                 @endif
                             </td>
-                            <td class="py-4 px-6 whitespace-nowrap {{ $user->email === Auth::user()->email ? 'text-orange' : 'text-gray-500' }} font-light">{{ $user->role }}</td>
-                            <td class="py-4 px-6 whitespace-nowrap {{ $user->email === Auth::user()->email ? 'text-orange' : 'text-gray-500' }} font-light">{{ $user->phone }}</td>
-                            <td class="py-4 px-6 whitespace-nowrap {{ $user->email === Auth::user()->email ? 'text-orange' : 'text-gray-500' }} font-light">{{ $user->email }}</td>
-                            <td class="py-4 px-6 whitespace-nowrap {{ $user->email === Auth::user()->email ? 'text-orange' : 'text-gray-500' }} font-light">{{ $user->created_at }}</td>
+                            <td class="py-4 px-6 whitespace-nowrap {{ itsme( $user->email ) ? 'text-orange' : 'text-gray-500' }} font-light">{{ mapearRol($user->role) }}</td>
+                            <td class="py-4 px-6 whitespace-nowrap {{ itsme( $user->email ) ? 'text-orange' : 'text-gray-500' }} font-light">{{ $user->phone }}</td>
+                            <td class="py-4 px-6 whitespace-nowrap {{ itsme( $user->email ) ? 'text-orange' : 'text-gray-500' }} font-light">{{ $user->email }}</td>
+                            <td class="py-4 px-6 whitespace-nowrap {{ itsme( $user->email ) ? 'text-orange' : 'text-gray-500' }} font-light">{{ $user->created_at }}</td>
                             <td id="actions" class="py-4 px-6 whitespace-nowrap flex space-x-2 items-center">
                                 <a href="/users?edit_user={{ base64_encode(encodeData($user)) }}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded shadow transition duration-300 transform hover:scale-105">
                                     Editar

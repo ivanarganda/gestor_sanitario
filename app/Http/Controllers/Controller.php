@@ -12,13 +12,18 @@ class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
+    public $pages_pagination = 3;
+
     // Function to send data by email both request, warnings, forward, etc...
     public function send( $data ){
         return view( 'send' , ['data' => $data] );
     }
 
     public function generatePagination( $data ){
-        
+        $extraParams = '';
+        if ( isset($_GET['s']) ){
+            $extraParams = '&s=' . $_GET['s'];
+        }
         return "
         <style>
                 /* Estilos para animar los botones de paginación */
@@ -74,18 +79,18 @@ class Controller extends BaseController
             <ul class='flex flex-row items-center gap-1'>
                 <!-- Previous page link -->
                 <li>
-                    <a href='{$data->previousPageUrl()}' class='pagination-link" . ($data->onFirstPage() ? ' disabled' : '') . "'>&laquo; Previous</a>
+                    <a href='{$data->previousPageUrl()}{$extraParams}' class='pagination-link" . ($data->onFirstPage() ? ' disabled' : '') . "'>&laquo; Previous</a>
                 </li>
                 <!-- Pagination elements -->
-                " . implode('', array_map(function($i) use ($data) {
+                " . implode('', array_map(function($i) use ($data , $extraParams) {
                     return "
                         <li>
-                            <a href='{$data->url($i)}' class='pagination-link" . ($i == $data->currentPage() ? ' active' : '') . "'>$i</a>
+                            <a href='{$data->url($i)}{$extraParams}' class='pagination-link" . ($i == $data->currentPage() ? ' active' : '') . "'>$i</a>
                         </li>";
                 }, range(1, $data->lastPage()))) . "
                 <!-- Next page link -->
                 <li>
-                    <a href='{$data->nextPageUrl()}' class='pagination-link" . ($data->hasMorePages() ? '' : ' disabled') . "'>Next &raquo;</a>
+                    <a href='{$data->nextPageUrl()}{$extraParams}' class='pagination-link" . ($data->hasMorePages() ? '' : ' disabled') . "'>Next &raquo;</a>
                 </li>
             </ul>
         </nav>
@@ -114,6 +119,53 @@ class Controller extends BaseController
         return $results;
     }
 
+    public function getSessions_view( $search ){
+        $query = DB::table('users as u')
+            ->leftJoin('sessions as s', 'u.id', '=', 's.user_id')
+            ->select(
+                'u.name as name', 
+                's.ip_address as ip_address', 
+                's.login_time as login_time', 
+                's.logout_time as logout_time', 
+                DB::raw('
+                CASE s.status
+                    WHEN "1" THEN "Exitosa"
+                    WHEN "0" THEN "Fallida"
+                    ELSE s.status
+                END as status
+            '));
+
+        if (!empty($search)) {
+            $query->where(function ($query) use ($search) {
+                $query->orWhere('s.id', 'like', '%' . $search . '%')
+                    ->orWhere('s.ip_address', 'like', '%' . $search . '%')
+                    ->orWhere('s.status', 'like', '%' . $search . '%');
+            });
+        }
+        
+        $results = $query->paginate(5);
+
+        return $results;
+    }
+
+    public function getUsers_view( $search ){
+        $query = DB::table('users');
+        
+        if (!empty($search)) {
+            $query->where(function ($query) use ($search) {
+                $query->orWhere('id', 'like', '%' . $search . '%')
+                    ->orWhere('role', 'like', '%' . $search . '%')
+                    ->orWhere('name', 'like', '%' . $search . '%')
+                    ->orWhere('colegiate', 'like', '%' . $search . '%')
+                    ->orWhere('email', 'like', '%' . $search . '%')
+                    ->orWhere('phone', 'like', '%' . $search . '%');
+            });
+        }
+
+        $results = $query->paginate( 5 );
+        return $results;
+    }
+
     public function getNotificationsByAdmin( $id ){
 
         $results = DB::table(DB::raw("(SELECT a.id AS administrator_id, a.name AS administrator_name, a.email AS administrator_email 
@@ -128,17 +180,27 @@ class Controller extends BaseController
 
     }
 
-    public function getNotificationsByAdmin_view( $id ){
-
-        $results = DB::table('users as u')
+    public function getNotificationsByAdmin_view($search, $id) {
+        // Ensure pages_pagination is defined
+        $this->pages_pagination = 15; // Example value, adjust as needed
+    
+        $query = DB::table('users as u')
         ->leftJoin('requestnotifications as rn', 'u.id', '=', 'rn.emisor')
         ->select(
             'u.name as emisor_user',
+            'u.role as role_user',
             'u.email as emisor_email',
             'rn.id as request_id',
             'rn.emisor as emisor',
             'rn.rubbised as rubbised',
-            'rn.request_type as request_type',
+            DB::raw('
+                CASE rn.request_type
+                    WHEN "change_password" THEN "cambiar contraseña"
+                    WHEN "change_name_user" THEN "cambiar usuario"
+                    WHEN "change_role" THEN "cambiar grupo"
+                    ELSE rn.request_type
+                END as request_type
+            '),
             'rn.title as request_title',
             'rn.description as description',
             'rn.created_at as created_at',
@@ -146,11 +208,75 @@ class Controller extends BaseController
             'rn.viewed as viewed',
             'rn.rubbised as recycled'
         )
-        ->where('rn.destinatary', $id)
-        ->paginate(3);
-        
-        return $results;
+        ->where('rn.destinatary', $id);
 
+    
+        // Add the search filter if the search parameter is set
+        if (!empty($search)) {
+            $query->where(function ($query) use ($search) {
+                $query->orWhere('u.name', 'like', '%' . $search . '%')
+                    ->orWhere('u.role', 'like', '%' . $search . '%')
+                    ->orWhere('u.email', 'like', '%' . $search . '%')
+                    ->orWhere('rn.title', 'like', '%' . $search . '%')
+                    ->orWhere('rn.status', 'like', '%' . $search . '%')
+                    ->orWhere('rn.description', 'like', '%' . $search . '%');
+            });
+        }
+    
+        $results = $query->paginate($this->pages_pagination);
+    
+        return $results;
+    }
+    
+
+    public function getMyRequestes_view($id)
+    {
+
+        $query = DB::table('users as u')
+            ->leftJoin('requestnotifications as rn', 'u.id', '=', 'rn.emisor')
+            ->select(
+                'u.name as emisor_user',
+                'u.email as emisor_email',
+                'u.role as role_user',
+                'rn.id as request_id',
+                'rn.emisor as emisor',
+                'rn.destinatary as destinatary',
+                DB::raw('(select a.name from administrators a where a.id = rn.destinatary) as administrator_name'),
+                DB::raw('(select a.email from administrators a where a.id = rn.destinatary) as administrator_email'),
+                DB::raw('
+                    CASE rn.request_type
+                        WHEN "change_password" THEN "cambiar contraseña"
+                        WHEN "change_name_user" THEN "cambiar usuario"
+                        WHEN "change_role" THEN "cambiar grupo"
+                        ELSE rn.request_type
+                    END as request_type
+                '),
+                'rn.title as request_title',
+                'rn.description as description',
+                'rn.created_at as created_at',
+                'rn.status as status',
+                'rn.viewed as viewed'
+            )
+            ->where('rn.emisor', $id);
+
+        // Add the search filter if the search parameter is set
+        // Get the search parameter if it's set
+        $search = isset($_GET['s']) ? $_GET['s'] : null;
+        if ($search) {
+            $query->where(function ($query) use ($search) {
+                $query->where('rn.id', 'like', '%' . $search . '%')
+                    ->orWhere('u.name', 'like', '%' . $search . '%')
+                    ->orWhere('u.email', 'like', '%' . $search . '%')
+                    ->orWhere('rn.title', 'like', '%' . $search . '%')
+                    ->orWhere('rn.status', 'like', '%' . $search . '%')
+                    ->orWhere('rn.description', 'like', '%' . $search . '%');
+            });
+        }
+
+        // Paginate the results
+        $results = $query->paginate($this->pages_pagination);
+
+        return $results;
     }
 
     public function getDetailsNotification( $id ){

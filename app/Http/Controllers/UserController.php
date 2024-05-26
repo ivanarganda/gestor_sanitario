@@ -75,50 +75,78 @@ class UserController extends Controller
         
     }
 
+    public function user_updated( $error = null){
+
+        if ( $error ) {
+            return redirect()->intended('/users')->with(['error'=>'User updated successfully but issues forwarding credentials by email to user']);
+        } else {
+            return redirect()->intended('/users')->with(['success'=>'User updated successfully and sent credentials to user']);
+        }
+        
+    }
+
     public function update(Request $request, string $id)
     {
-
         try {
-
+            // Fetch the user
             $user = User::findOrFail($id);
 
-            if ( $user->role =='staff' ){
-                if ( Administrator::where('id',$id)->exists() ){
-                    $admin = Administrator::findOrFail($id);
-                    $admin->name = $request->input('name');
-                    $admin->email = $request->input('email');
-                    $admin->update($request->all());
-                } else {
-                    $admin = new Administrator();
-                    $admin->user_id = $id;
-                    $admin->name = $request->input('name');
-                    $admin->email = $request->input('email');
-                    $admin->save();
+            // Validate the request data
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|max:255',
+            ]);
 
-                }
-                $user_ = User::findOrFail($id);
-                $user_->activated = '1';
-                $user_->email_verified_at = date('Y-m-d H:i:s');
-                $user_->save();
+            // If the user is staff, manage the Administrator record
+            if ($user->role == 'staff') {
+                $admin = Administrator::firstOrNew(['id' => $id]);
+                $admin->user_id = $id;
+                $admin->name = $request->input('name');
+                $admin->email = $request->input('email');
+                $admin->save();
+
+                // Update the user's activated status
+                $user->activated = '1';
+                $user->email_verified_at = now();
             }
 
+            // Store previous data for comparison
+            $previousData = $user->only(['name', 'email', 'password', 'role']);
+
+            // Update user details
+            $user->name = $request->input('name');
+            $user->email = $request->input('email');
             $user->update($request->all());
-            
-            $user->save();
-            
-            return redirect()->intended('/users')->with(['success'=>'Made changes succesfully']);
 
-        } catch ( QueryException $e){
+            // Check for changes
+            $dataChanged = [];
+            foreach (['name', 'password', 'role'] as $field) {
+                if ($previousData[$field] != $user->$field) {
+                    $dataChanged[ucfirst($field)] = $user->$field;
+                }
+            }
 
-            if ( preg_match( '/Integrity constraint violation: 1062 Duplicate entry/' , $e->getMessage() ) ){
+            // Prepare data for redirection if changes are detected
+            if (!empty($dataChanged)) {
+                $json_data = [
+                    'type' => 'sendCredentialsUpdated',
+                    'dataUpdated' => $dataChanged,
+                    'email' => $user->email,
+                ];
+                return redirect()->intended('/send/' . base64_encode(json_encode($json_data)) . '/');
+            }
+
+            return redirect()->intended('/users')->with(['success' => 'User updated successfully']);
+
+        } catch (QueryException $e) {
+            if (preg_match('/Integrity constraint violation: 1062 Duplicate entry/', $e->getMessage())) {
                 return redirect()->back()->with(['error' => 'Not made changes due to another user with same email']);
             } else {
                 return redirect()->back()->with(['error' => $e->getMessage()]);
             }
-
         }
-
     }
+
 
     public function delete(string $id){
         $user = User::findOrFail($id);
@@ -160,40 +188,28 @@ class UserController extends Controller
         }
     }
 
-    public function getSessions(Request $request)
+    public function getSessions( $s = null )
     {
-        $query = DB::table('users as u')
-            ->leftJoin('sessions as s', 'u.id', '=', 's.user_id')
-            ->select('u.name as name', 's.ip_address as ip_address', 's.login_time as login_time', 's.logout_time as logout_time', 's.status as status');
+
+        $sessions = $this->getSessions_view( $s );
     
-        if ($request->filled('user_name')) {
-            $query->where('u.name', 'like', '%' . $request->input('user_name') . '%');
-        }
-    
-        if ($request->filled('session_status')) {
-            $sessionStatus = $request->input('session_status');
-            $query->where('s.status', $sessionStatus);
-        }
-    
-        $users = $query->paginate(10);
-        
         // Generate pagination data
-        $pagination = $this->generatePagination($users);
+        $pagination = $this->generatePagination($sessions);
     
-        return view('Pages.log-users', compact('users', 'pagination'));
+        return view('Pages.log-users', [ 'sessions' => $sessions, 'pagination' => $pagination , 'search' => $s ]);
     }
 
-    public function getUsers(Request $request){
+    public function getUsers( $s = null ){
+        
         DB::enableQueryLog();
         // Start building the query
-        $query = User::query();
-        $users = $query->paginate(5);
+        $users = $this->getUsers_view( $s );
 
         // Generate pagination data
         $pagination = $this->generatePagination($users);
 
         // Return the view with users and pagination data
-        return view('Pages.gestion-usuarios', compact('users', 'pagination'));
+        return view('Pages.gestion-usuarios', [ 'users' => $users, 'pagination' => $pagination , 'search' => $s ]);
     }
         
 }

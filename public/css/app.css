@@ -10,6 +10,20 @@ input[type="text"] , input[type="email"] , input[type="password"] , input[type="
     color:rgb(83, 83, 83);
 }
 
+input, select, textarea {
+  transition: all 0.3s ease-in-out;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: #3b82f6; /* Blue-500 */
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.5); /* Blue-500 with opacity */
+}
+
+button:focus {
+  outline: none;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.5); /* Blue-500 with opacity */
+}
+
 .toggle-wrapper {
     display: inline-block;
     position: relative;

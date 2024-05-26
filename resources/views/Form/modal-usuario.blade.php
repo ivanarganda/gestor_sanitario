@@ -68,7 +68,7 @@
                 </div>
                 <div>
                     <label for="password" class="block text-sm font-medium text-gray-700">Contraseña</label>
-                    <input required type="password" value="{{$data_user->password}}" name="password" id="password" class="pr-2 outline-none mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                    <input required type="password" value="{{base64_decode($data_user->password)}}" name="password" id="password" class="pr-2 outline-none mt-1 block w-full border-gray-300 rounded-md shadow-sm">
                 </div>
                 <div>
                     <label for="email" class="block text-sm font-medium text-gray-700">Email</label>

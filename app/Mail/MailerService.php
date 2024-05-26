@@ -45,6 +45,10 @@ class MailerService extends Mailable
             $view = 'Mail.sendCredentials';
             $subject = 'Credenciales plataforma para el usuario ' . $this->data->email;
         }
+        if ( $this->data->type == 'sendCredentialsUpdated' ){
+            $view = 'Mail.sendCredentialsUpdated';
+            $subject = 'Credenciales actualizadas de la plataforma para el usuario ' . $this->data->email;
+        }
 
         return $this->view( $view ,[
             'data' => $this->data

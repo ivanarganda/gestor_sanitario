@@ -13,19 +13,23 @@ Route::get('/', function () {
 });
 
 Route::middleware(['check.login'])->group(function () {
-    Route::get('/users/{user_name?}', [UserController::class, 'getUsers'])->name('users');
+    Route::get('/users/{s?}', [UserController::class, 'getUsers'])->name('users');
     Route::get('/users/delete/{id}', [UserController::class, 'delete'])->name('delete');
     Route::get('/users/settings', [UserController::class, 'settingsUser'])->name('settingsUser');
     Route::get('/send/{data}', [Controller::class, 'send']);
     Route::get('/send/{data}', [Controller::class, 'send']);
     Route::get('/user-registered/{error?}', [UserController::class, 'user_registered']);
+    Route::get('/user-updated/{error?}', [UserController::class, 'user_updated']);
     Route::get('/request-created/{error?}', [NotificationController::class, 'request_created']);
     Route::get('/request-restaured/{error?}', [NotificationController::class, 'request_restaured']);
     Route::get('/request-recycled/{error?}', [NotificationController::class, 'request_recycled']);
+    Route::get('/requestes-deleted/{error?}', [NotificationController::class, 'requestes_deleted']);
+    Route::get('/requestes-restaured/{error?}', [NotificationController::class, 'requestes_restaured']);
     Route::get('/request-changed/{status}/{error}', [NotificationController::class, 'status_request_changed']);
-    Route::get('/sessions/{user_name?}/{session_status?}', [UserController::class, 'getSessions'])->name('sessions');
+    Route::get('/sessions/{s?}', [UserController::class, 'getSessions'])->name('sessions');
     Route::get('/form_request_credentials', [NotificationController::class, 'form_request_credentials'])->name('form_request_credentials');
-    Route::get('/inbox', [NotificationController::class, 'getNotifications'])->name('inbox');
+    Route::get('/inbox/admin/{s?}', [NotificationController::class, 'getNotifications'])->name('inbox_admin');
+    Route::get('/requestes/{s?}', [NotificationController::class, 'getMyRequestes'])->name('requestes');
     Route::get('/inbox/in/{id}', [NotificationController::class, 'getDetails']);
 });
 

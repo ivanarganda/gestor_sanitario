@@ -12,6 +12,9 @@
       @if ( json_decode($jsonData)->type == 'sendCredentials' )
         <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-300">Registering and sending credentials to user {{json_decode($jsonData)->email}}</h2>
       @endif
+      @if ( json_decode($jsonData)->type == 'sendCredentialsUpdated' )
+        <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-300">Updating and sending credentials to user {{json_decode($jsonData)->email}}</h2>       
+      @endif
       @if ( json_decode($jsonData)->type == 'requestCredentials' )
         <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-300">Sending request to admin</h2>
       @endif
@@ -29,15 +32,19 @@
     .then(data => {
         if ( @json($type) == 'sendCredentials' ){
             window.location = '/user-registered';
-        } else {
+        } else if ( @json($type) == 'requestCredentials' ) {
             window.location = '/request-created';
+        } else {
+            window.location = '/user-updated';
         }
         console.log(data);
     }).catch(() => {
-      if ( @json($type) == 'sendCredentials' ){
+        if ( @json($type) == 'sendCredentials' ){
             window.location = '/user-registered/error';
-        } else {
+        } else if ( @json($type) == 'requestCredentials' ) {
             window.location = '/request-created/error';
+        } else {
+            window.location = '/user-updated/error';
         }
     });
 </script>

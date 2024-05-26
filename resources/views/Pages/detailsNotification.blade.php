@@ -9,7 +9,7 @@
         <div class="flex flex-row justify-center space-x-5 items-center">
             <div class="mt-5">
                 @php
-                    echo generateTitleSection('Detalles solicitud' , '/inbox');
+                    echo generateTitleSection('Detalles solicitud' , '/inbox/admin');
                 @endphp 
             </div>
         </div>
