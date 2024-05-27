@@ -114,6 +114,9 @@ class Controller extends BaseController
     public function registerUser( $data ){
         DB::table('users')->insert( $data );
     }
+    public function sendMessage( $data ){
+        DB::table('chatnotificationsrequest')->insert( $data );
+    }
     public function getAdministratorsEmail(){
         $results = DB::table('administrators')->get();
         return $results;
@@ -229,39 +232,44 @@ class Controller extends BaseController
     }
     
 
-    public function getMyRequestes_view($id)
+    public function getMyRequestes_view( $search , $id)
     {
 
         $query = DB::table('users as u')
-            ->leftJoin('requestnotifications as rn', 'u.id', '=', 'rn.emisor')
-            ->select(
-                'u.name as emisor_user',
-                'u.email as emisor_email',
-                'u.role as role_user',
-                'rn.id as request_id',
-                'rn.emisor as emisor',
-                'rn.destinatary as destinatary',
-                DB::raw('(select a.name from administrators a where a.id = rn.destinatary) as administrator_name'),
-                DB::raw('(select a.email from administrators a where a.id = rn.destinatary) as administrator_email'),
-                DB::raw('
-                    CASE rn.request_type
-                        WHEN "change_password" THEN "cambiar contraseña"
-                        WHEN "change_name_user" THEN "cambiar usuario"
-                        WHEN "change_role" THEN "cambiar grupo"
-                        ELSE rn.request_type
-                    END as request_type
-                '),
-                'rn.title as request_title',
-                'rn.description as description',
-                'rn.created_at as created_at',
-                'rn.status as status',
-                'rn.viewed as viewed'
-            )
-            ->where('rn.emisor', $id);
+        ->leftJoin('requestnotifications as rn', 'u.id', '=', 'rn.emisor')
+        ->leftJoin('chatnotificationsrequest as cr', 'cr.request_id', '=', 'rn.id')
+        ->select(
+            'u.name as emisor_user',
+            'u.email as emisor_email',
+            'u.role as role_user',
+            'rn.id as request_id',
+            'rn.emisor as emisor',
+            'rn.destinatary as destinatary',
+            DB::raw('(select a.name from administrators a where a.id = rn.destinatary) as administrator_name'),
+            DB::raw('(select a.email from administrators a where a.id = rn.destinatary) as administrator_email'),
+            DB::raw('
+                CASE rn.request_type
+                    WHEN "change_password" THEN "cambiar contraseña"
+                    WHEN "change_name_user" THEN "cambiar usuario"
+                    WHEN "change_role" THEN "cambiar grupo"
+                    ELSE rn.request_type
+                END as request_type
+            '),
+            'rn.title as request_title',
+            'rn.description as description',
+            'rn.created_at as created_at',
+            'rn.status as status',
+            'rn.viewed as viewed'
+        )
+        ->addSelect(DB::raw("(
+            SELECT COUNT(*)
+            FROM chatnotificationsrequest cr2
+            WHERE cr2.request_id = rn.id
+        ) AS messages_chat"))
+        ->where('rn.emisor', $id);
 
         // Add the search filter if the search parameter is set
         // Get the search parameter if it's set
-        $search = isset($_GET['s']) ? $_GET['s'] : null;
         if ($search) {
             $query->where(function ($query) use ($search) {
                 $query->where('rn.id', 'like', '%' . $search . '%')
@@ -298,6 +306,59 @@ class Controller extends BaseController
         ->get();
         
         return $results;
+    }
+
+    public function getChatList( $id ){
+        $destinataryChats = DB::table('chatnotificationsrequest')
+            ->select('destinatary')
+            ->distinct()
+            ->where('emisor', $id);
+
+        // Main query
+        $results = DB::table(DB::raw('(' . $destinataryChats->toSql() . ') as dc'))
+            ->select(
+                'dc.destinatary', 
+                'cr.message as last_message',
+                DB::raw('(select u.name from users u where u.id = dc.destinatary) as user_destinatary'),
+                DB::raw('(select u.email from users u where u.id = dc.destinatary) as email_destinatary'),
+                'cr.created_at as last_message_date')
+            ->join(DB::raw('LATERAL (
+                SELECT cr.message, cr.created_at
+                FROM chatnotificationsrequest cr
+                WHERE cr.destinatary = dc.destinatary
+                ORDER BY cr.created_at DESC
+                LIMIT 1
+            ) as cr'), DB::raw('1'), '=', DB::raw('1'))
+            ->mergeBindings($destinataryChats) // Merge bindings from the subquery
+            ->get();
+
+        return $results;
+    }
+
+    public function getChatRoom( $emisor , $destinatary ){
+
+        $results = DB::table('chatnotificationsrequest as cr')
+        ->rightJoin('requestnotifications as rn', 'rn.id', '=', 'cr.request_id')
+        ->rightJoin('users as u', 'u.id', '=', 'rn.emisor')
+        ->select(
+            DB::raw('(select u2.name from users u2 where u2.id = cr.destinatary) as user_destinatary'),
+            DB::raw('(select u2.email from users u2 where u2.id = cr.destinatary) as email_destinatary'),
+            'cr.*',
+            'u.name as emisor_name',
+            'u.email as emisor_email'
+        )
+        ->where(function($query) use ($emisor, $destinatary) {
+            $query->where('cr.emisor', $emisor)
+                ->where('cr.destinatary', $destinatary);
+        })
+        ->orWhere(function($query) use ($emisor, $destinatary) {
+            $query->where('cr.emisor', $destinatary)
+                ->where('cr.destinatary', $emisor);
+        })
+        ->get();
+
+        return $results;
+
     }
     
 }

@@ -74,15 +74,15 @@ class NotificationController extends Controller
     }
 
     // Get notifications from user panel for view
-    public function getMyRequestes(){
+    public function getMyRequestes( $s = null ){
 
         try {
 
-            $notifications = $this->getMyRequestes_view( Auth::user()->id );
+            $notifications = $this->getMyRequestes_view( $s , Auth::user()->id );
 
             $pagination = $this->generatePagination( $notifications );
 
-            return view('Pages.myinbox' , [ 'notifications' => $notifications , 'pagination' => $pagination ] );
+            return view('Pages.myinbox' , [ 'notifications' => $notifications , 'pagination' => $pagination , 'search' => $s ] );
 
 
         } catch ( QueryException $e ){

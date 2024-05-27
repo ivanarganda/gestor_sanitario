@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MailController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ChatController;
 
 Route::get('/', function () {
     return view('main');
@@ -26,6 +27,7 @@ Route::middleware(['check.login'])->group(function () {
     Route::get('/requestes-deleted/{error?}', [NotificationController::class, 'requestes_deleted']);
     Route::get('/requestes-restaured/{error?}', [NotificationController::class, 'requestes_restaured']);
     Route::get('/request-changed/{status}/{error}', [NotificationController::class, 'status_request_changed']);
+    Route::get('/contacted_with_administrator/{error?}', [ChatController::class, 'contacted_with_administrator']);
     Route::get('/sessions/{s?}', [UserController::class, 'getSessions'])->name('sessions');
     Route::get('/form_request_credentials', [NotificationController::class, 'form_request_credentials'])->name('form_request_credentials');
     Route::get('/inbox/admin/{s?}', [NotificationController::class, 'getNotifications'])->name('inbox_admin');

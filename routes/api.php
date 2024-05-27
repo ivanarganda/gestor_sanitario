@@ -6,6 +6,7 @@ use App\Http\Controllers\WindowSizeController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\MailController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ChatController;
 
 /*
 |--------------------------------------------------------------------------
@@ -32,6 +33,10 @@ Route::post('/inbox/restaure', [NotificationController::class, 'restaure']);
 Route::post('/inbox/recycle', [NotificationController::class, 'recycle']);
 Route::post('/inbox/multipledelete', [NotificationController::class, 'multipledelete']);
 Route::post('/inbox/multiplerestaure', [NotificationController::class, 'multiplerestaure']);
+Route::post('/myinbox/chat/create', [ChatController::class, 'createchat']);
+Route::get('/requestes/chat/in/{id?}', [ChatController::class, 'generateChatList']);
+Route::get('/requestes/chatroom/in/{id?}', [ChatController::class, 'generateChatRoom']);
+
 
 
 

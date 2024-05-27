@@ -32,6 +32,12 @@ const checkbox_requestes = document.querySelectorAll(".checkbox_requestes");
 // Todos los checkboxes de las acciones de la tabla de usuarios
 const checkboxes = document.querySelectorAll("#table-users tbody tr #actions .checkbox");
 
+// Botones de contacto mis solicitudes
+const botones_nuevo_chat_administrador = document.querySelectorAll(".botones_nuevo_chat");
+
+// Chatbox 
+const chatBox = document.querySelector("#myChats");
+
 // Animación de carga
 const loadAnimation = (type, element, styles) => {
     if (type === "swing") {
@@ -45,8 +51,6 @@ const loadAnimation = (type, element, styles) => {
 // Enviar correo
 const sendEmail = ( type , data ) => {
 
-    console.log( data.status );
-
     const json_data = new FormData();
     json_data.append('data', JSON.stringify(data));
 
@@ -57,16 +61,78 @@ const sendEmail = ( type , data ) => {
     .then(response => response.json())
     .then(data => {
         console.log(data);
-        if ( type != 'aprobarODenegar' ) {
+        if ( type == 'aprobarODenegar' ) {
+            window.location = '/request-changed/' + data.status + '/-1/';
+        } else if ( type == 'masDetalles' ) {
             return true;
         } else {
-            window.location = '/request-changed/' + data.status + '/-1/';
+            console.log( data );
+            window.location = '/contacted_with_administrator';
         }
     })
     .catch((error) => {
         console.log(error);
-        window.location = '/request-changed/' + data.status + '/' + error + '/';
+        if ( type == 'aprobarODenegar' ) {
+            window.location = '/request-changed/' + data.status + '/' + error + '/';
+        } else if ( type == 'masDetalles' ) {
+            return true;
+        } else {
+            console.log( data );
+            window.location = '/contacted_with_administrator/error';
+        }
+        
     });
+}
+
+const openChatRoom = async( destinatary ) =>{
+    try {
+        let response = await fetch(`${window.location.protocol}//${window.location.host}/api/requestes/chatroom/in/${destinatary}`, {
+            method: 'GET',
+            mode: 'cors',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        let data = await response.json();
+        return new Promise((resolve) => {
+            resolve(data);
+        });
+        
+    } catch (error) {
+        console.error('Error loading chatbox' + error);
+        return true;    
+    }
+    
+}
+
+// Open chatbox
+const openChatBox = async() => {
+    try {
+        let response = await fetch(`${window.location.protocol}//${window.location.host}/api/requestes/chat/in`, {
+            method: 'GET',
+            mode: 'cors',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        let data = await response.json();
+
+        return new Promise((resolve) => {
+            resolve(data);
+        });
+
+    } catch (error) {
+        console.error('Error loading chatbox' + error);
+        return true;
+    }
 }
 
 // Cargar notificaciones
@@ -247,7 +313,11 @@ if (badget_notification) {
         firstLoad = false;
         loadNotifications()
     } 
-    setInterval(() => loadNotifications(), 1500);
+    setInterval(() => loadNotifications(), 3500);
+
+    setTimeout(()=>{
+        window.location.reload();
+    }, 35000)
 }
 
 // Mapear acciones de botones de notificaciones
@@ -308,6 +378,9 @@ if ( botones_mas_detalles || botones_reciclar || botones_restaurar ){
                 'id': $('#identity_' + event.target.id ).text(),
                 'status': 'proceso',
             };
+
+            $("#boton_delete_multiple_requestes").hide();
+            $("#boton_restaure_multiple_requestes").hide();
     
             sendEmail( 'masDetalles' , jsonData );
             
@@ -510,4 +583,214 @@ if ( input_search ){
         }
     })
 
+}
+
+if ( chatBox ){
+
+    $('#myChats').hide();
+    $('#chatRoom').hide();
+
+    // $('#myChats').hide();
+    const boton_chatbox = document.querySelector('#boton_chatbox');
+    $(boton_chatbox).on('click',()=>{
+        $('#myChats').fadeToggle();
+    });
+
+    openChatBox()
+    .then((data) => {
+        let json_data = data.data;
+        let content = `<div class="h-full w-full overflow-auto rounded-md">
+                    <div class="w-full h-full container mx-auto">
+            <div class="w-full h-full bg-white shadow-md rounded-lg overflow-hidden">`;
+        content+=`<div class="w-full flex flex-row justify-between p-4 border-b">
+                <h2 class="text-xl font-semibold text-gray-800">Chats</h2>
+                <span id='close_chat_box' class="text-xl font-semibold text-gray-800">x</h2>
+            </div><ul class="chats_li divide-y divide-gray-200">`
+        if (json_data.length === 0) {
+            content+=`<li class="p-4 hover:bg-gray-100 cursor-pointer flex items-center">No tienes chats</li>
+                    </ul>
+                    </div>
+                </div>
+            </div>`;
+            $('#myChats').html(`${content}`);
+            return false;
+        }
+        json_data.forEach(( element )=>{
+            console.log( element );
+            content+=`<li id='${element.destinatary}' class="list_chats p-4 hover:bg-gray-100 cursor-pointer flex items-center">
+                <div id='${element.destinatary}' class="flex-shrink-0">
+                    <img id='${element.destinatary}' class="h-10 w-10 rounded-full" src="https://via.placeholder.com/40" alt="User Avatar">
+                </div>
+                <div id='${element.destinatary}' class="ml-3">
+                    <p id='${element.destinatary}' class="text-sm font-medium text-gray-900">${element.user_destinatary}(${element.email_destinatary})</p>
+                    <p id='${element.destinatary}' class="text-sm text-gray-500">${element.last_message}</p>
+                </div>
+            </li>`;
+        })
+        content+=`</ul></div>
+            </div>
+        </div>`;
+        $('#myChats').html(`${content}`);
+
+        $("#close_chat_box").on('click', ()=>{
+            $('#myChats').fadeOut();
+            $('#chatRoom').fadeOut();
+        }); 
+
+        const list_chats = document.querySelectorAll(".list_chats");
+        console.log( list_chats );
+        list_chats.forEach((list)=>{
+            $(list).on('click',( event )=>{
+                event.preventDefault();
+                let destinatary = event.target.id;
+                // Open a chat room
+                openChatRoom(destinatary)
+                .then(( data )=>{
+                    console.log( data );
+
+                    let json_data = data.data;
+                    let content = ``;
+                    let emisor = $("#emisor").text();
+                    content = `<div class="h-full w-full overflow-auto rounded-md">
+                        <div class="w-full h-full container mx-auto">
+                        <div class="w-full h-full bg-white shadow-md rounded-lg overflow-hidden">`;
+                    content+=`<div class="w-full flex flex-row justify-between p-4 border-b">
+                            <h2 class="text-xl font-semibold text-gray-800">${data.data[0].title}</h2>
+                            <span id="close_chat_room" class="text-xl font-semibold text-gray-800">x</h2>
+                        </div><ul class="flex flex-col space-y-8 divide-y divide-gray-200">`
+                    if (json_data.length === 0) {
+                        content+=`<li class="p-4 hover:bg-gray-100 cursor-pointer flex items-center">No tienes chats</li>
+                                </ul>
+                                </div>
+                            </div>
+                        </div>`;
+                        $('#chatRoom').html(`${content}`).fadeIn();
+                        return false;
+                    }
+                    
+                    json_data.forEach(( element )=>{
+                        let positionText = 'right';
+                        if ( emisor == element.destinatary ){
+                            positionText = 'left';
+                            element.user_destinatary = 'Yo';
+                        }
+                        console.log( element );
+                        content+=`<li lass="list_chats p-4 hover:bg-gray-100 cursor-pointer flex items-center">
+                            <div class="ml-3">
+                                <p class="text-${positionText} text-xs p${positionText[0]}-4 font-medium text-gray-500">${element.user_destinatary}</p>
+                                <p class="text-${positionText} text-sm p${positionText[0]}-4 font-medium text-gray-900">${element.message}</p>
+                            </div>
+                        </li>`;
+                    })
+                    content+=`
+                            </ul></div>
+                        </div>
+                    </div>
+                    <div class='w-full bg-white'>
+                    <hr />
+                        <textarea placeholder='Escribe un mensaje' rows='5' style="background:white" class='w-full rounded-md z-40'></textarea>
+                        <div class="flex flex-row justify-end">
+                            <span class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded focus:outline-none focus:shadow-outline">Enviar</span>
+                        </div>
+                    </div>`;
+
+                    $("#chatRoom").html(content).fadeIn();
+                    $("#close_chat_room").on('click', ()=>{
+                        $('#chatRoom').fadeOut();
+                    }); 
+                }) 
+                .catch(( error )=>{
+                    console.log( 'Error opening chat room', error );
+                });
+            })
+        });
+
+    });
+
+}
+
+if ( botones_nuevo_chat_administrador  ){
+
+    botones_nuevo_chat_administrador.forEach(( boton )=>{
+        $(boton).on('click',( event )=>{
+            event.preventDefault();
+            let request_id = event.target.id;
+            let title = $(`#title_${request_id}`).text();
+            let administrator_email = $(`#administrator_email_${request_id}`).text();
+            let administrator_name = $(`#administrator_name_${request_id}`).text();
+            let user_email = $(`#user_email_${request_id}`).text();
+            let user_name = $(`#user_name_${request_id}`).text();
+            let emisor = $(`#user_id_${request_id}`).text();
+            let receptor = $(`#admin_id_${request_id}`).text();
+            
+            $("#modalBackdrop_contact_administrator").html(`
+                <div class="fixed inset-0 bg-gray-800 z-10 bg-opacity-50 flex items-center justify-center">
+                    <!-- Modal -->
+                    <div class="bg-white rounded-lg shadow-lg p-2 w-2/3">
+                        <!-- Modal Header -->
+                        <div class="flex justify-between items-center border-b p-4">
+                            <h3 class="text-xl font-semibold">Enviar mensaje a ${administrator_name}(${administrator_email})</h3>
+                            <span id="closeModal" class="text-gray-400 hover:text-gray-600">
+                                &times;
+                            </span>
+                        </div>
+                        <!-- Modal Body -->
+                        <div class="p-4 mb-4 w-full">
+                            <div class="w-full flex flex-row items-center">
+                                <h2 class="w-full text-gray-900 font-semibold" for="message_admin">Escribe un mensaje</h2>
+                            </div>
+                        
+                            <div class="w-full flex flex-row items-center">
+                                <textarea rows="5" required placeholder="Escribe un mensaje" id="message_admin" class="p-0 mt-2 block w-full shadow-lg text-gray-600 border-gray-300 rounded-md shadow-sm focus:border-blue-500 transition">
+                                </textarea>
+                            </div>
+                        </div>
+                        <div class="p-4 mb-4 w-full">
+                            <span class="bg-blue-500 hover:bg-blue-600 transition transform duration-300 p-2 text-gray-100 rounded-md" id="enviar_correo_administrador">Enviar</span>
+                        </div>
+                    </div>
+                </div>`);
+
+            $("#closeModal").on('click',( event )=>{
+                event.preventDefault();
+                $("#modalBackdrop_contact_administrator").html('');
+            })
+
+            $("#enviar_correo_administrador").on('click',( event )=>{
+                event.preventDefault();
+                let jsonData = {
+                    request_id: request_id,
+                    type: 'contactWithAdministrator',
+                    email: administrator_email,
+                    title: title,
+                    administrator_email: administrator_email,
+                    administrator_name: administrator_name,
+                    user_email: user_email,
+                    user_name: user_name,
+                    emisor: emisor,
+                    receptor: receptor,
+                    message: $("#message_admin").val()
+                }
+
+                const data = new FormData();
+                data.append('data', JSON.stringify(jsonData) );
+                fetch(window.location.protocol + '/api/myinbox/chat/create', {
+                    method: 'POST',
+                    body: data
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log( data );
+                    sendEmail('contact', jsonData );
+                })
+                .catch((error) => {
+                    console.log( error );
+                    window.location = '/contacted_with_administrator/error';
+                });  
+            
+            });
+
+        });
+    });
+    
 }

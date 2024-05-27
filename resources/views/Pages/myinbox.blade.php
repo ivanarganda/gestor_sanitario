@@ -4,8 +4,20 @@
 @php 
     echo generateSidebar(['Trash', 'Lupe']);
 @endphp
-<div class="container mx-auto my-8">
-    <div id="modalBackdrop_confirm_deleete_solicitud">
+<div class="relative container mx-auto my-8">
+    <div id="modalBackdrop_contact_administrator">
+    </div>
+    <div class="fixed cursor-pointer bottom-0 w-20 h-20 right-10 z-10">
+        <div id="myChats" class="w-80 absolute -top-96 -left-60 h-96 lg:-left-60 shadow-lg bg-gray-100 z-30">
+        </div>
+        <svg class="absolute h-full w-full text-gray-700" id="boton_chatbox"  fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+        </svg>  
+    </div>
+    <div class="fixed cursor-pointer bottom-0 w-20 h-20 right-96 z-10">
+        <span hidden id="emisor">{{Auth::user()->id}}</span>
+        <div id="chatRoom" style="top:-630% !important" class="w-80 absolute -left-60 h-96 lg:-left-60 rounded-md shadow-lg bg-gray-100 z-30">
+        </div>
     </div>
     <div class="bg-white shadow-md rounded-lg overflow-hidden">
         <div class="flex flex-row justify-center space-x-5 items-center">
@@ -14,6 +26,16 @@
                     echo generateTitleSection('Mis solicitudes');
                 @endphp 
             </div>
+        </div>
+        <div>
+            <div class="flex flex-row justify-center space-x-5 items-center">
+                <div class="w-full lg:w-1/2 mt-5 flex flex-row justify-center mb-5">
+                    @php
+                        echo generateSearch('/requestes', $search);
+                    @endphp 
+                </div>
+            </div>
+        </div>
         </div>
         <div class="p-6 space-y-6">
             @if (count($notifications) == 0)
@@ -29,7 +51,7 @@
                 @foreach ($notifications as $notification)
                 <label class="flex items-start" for="icon-request_{{$notification->request_id}}">
                     <div class="w-full bg-gray-50 p-4 rounded-lg shadow-sm flex flex-col lg:flex-row justify-between items-center space-y-4"> 
-                        <div class="w-1/3 flex items-start">
+                        <div class="w-full lg:w-1/3 flex flex-col justify-center lg:justify-start lg:flex-row lg:items-start">
                                 <div class="flex-shrink-0">
                                     {!!getIconAccordingRequest( $notification->request_type )!!}
                                 </div>
@@ -45,23 +67,34 @@
                                     <p class="text-gray-400 text-xs mt-1">Estado: {!!mapearEstadoSolicitud($notification->status)!!}</p>
                                 </div>
                         </div>
-                        <div class="text-gray-400 w-1/3 flex justify-start text-left text-xs mt-1 overflow-hidden">
+                        <div class="text-gray-400 w-full lg:w-1/3 flex flex-col lg:flex-row lg:items-start lg:justify-start text-left text-xs mt-1 overflow-hidden">
                             <span>{{ cutText($notification->description) }}</span>
                         </div>
-                        <div class="flex justify-center space-x-2">
+                        <div class="flex flex-col w-full justify-center lg:w-1/3 lg:flex-row lg:justify-end space-x-2">
                             <span hidden id="request_id_{{$notification->request_id}}">{{$notification->request_id}}</span>
                             <span hidden id="title_{{$notification->request_id}}">{{$notification->request_title}}</span>
                             <span hidden id="identity_{{$notification->request_id}}">{{$notification->request_id}}</span>
                             <span hidden id="message_{{$notification->request_id}}">{{$notification->description}}</span>
-                            <span hidden id="current_page">{{isset($_GET['page']) ? $_GET['page'] : ''}}</span>
+                            <span hidden id="user_email_{{$notification->request_id}}">{{Auth::user()->email}}</span>
+                            <span hidden id="user_id_{{$notification->request_id}}">{{Auth::user()->id}}</span>
+                            <span hidden id="admin_id_{{$notification->request_id}}">{{$notification->destinatary}}</span>
+                            <span hidden id="user_name_{{$notification->request_id}}">{{Auth::user()->name}}</span>
+                            <span hidden id="administrator_email_{{$notification->request_id}}">{{$notification->administrator_email}}</span>
+                            <span hidden id="administrator_name_{{$notification->request_id}}">{{$notification->administrator_name}}</span>
                             <a class="flex flex-row space-x-2 bg-blue-500 hover:bg-blue-600 transition transform duration-300 p-2 items-center rounded-md">
                                 <svg id="{{$notification->request_id}}" class="flex items-center botones_contact_administrator cursor-pointer text-gray-100 font-semibold rounded-lg h-8 w-8"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round">  
                                     <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />  
                                     <polyline points="22,6 12,13 2,6" />
                                 </svg>
-                                <span class="text-gray-100 font-semibold">
-                                    Contactar
-                                </span>
+                                @if ( $notification->messages_chat > 0 )
+                                    <span id="{{$notification->request_id}}" class="cursor-pointer botones_contacto text-gray-100 font-semibold">
+                                        Seguir conversando
+                                    </span>
+                                @else
+                                    <span id="{{$notification->request_id}}" class="cursor-pointer botones_nuevo_chat text-gray-100 font-semibold">
+                                        Iniciar nueva conversacion
+                                    </span>
+                                @endif
                             </a>
                         </div>
                     </div>
