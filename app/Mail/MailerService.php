@@ -39,7 +39,11 @@ class MailerService extends Mailable
         }
         if ( $this->data->type =='contactWithAdministrator' ){
             $view = 'Mail.contactWithAdministrator';
-            $subject = 'Nuevo mensaje de '.$this->data->title.'';
+            $subject = 'Nuevo mensaje de '.$this->data->user_name.'('.$this->data->user_email.')';
+        }
+        if ( $this->data->type =='contact' ){
+            $view = 'Mail.contact';
+            $subject = 'Mensaje de '.$this->data->user_name.'('.$this->data->user_email.')';
         }
         if ( $this->data->type == 'requestCredentials' ){
             $view = 'Mail.requestCredentials';

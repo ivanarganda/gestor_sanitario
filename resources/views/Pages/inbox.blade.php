@@ -7,6 +7,7 @@
 <div class="container mx-auto my-8">
     <div id="modalBackdrop_confirm_deleete_solicitud">
     </div>
+    @include('Pages.chat_page')
     <div class="bg-white shadow-md rounded-lg overflow-hidden">
         <div class="w-full min-w-fit px-2 flex flex-row justify-center space-x-5 items-center">
             <div class="w-1/2 min-w-fit mt-5">

@@ -35,6 +35,7 @@ class ChatController extends Controller
             'emisor' => $emisor,
             'destinatary' => $destinatary,
             'request_id' => $request_id,
+            'created_at' => now()
         ];
 
         $this->sendMessage( $json_data );

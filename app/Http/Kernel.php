@@ -22,6 +22,7 @@ class Kernel extends HttpKernel
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
         // \App\Http\Middleware\AuthUser::class,
+        // \App\Http\Middleware\Api_login::class,
     ];
 
     /**
@@ -72,5 +73,6 @@ class Kernel extends HttpKernel
         'check.login' => \App\Http\Middleware\CheckLogin::class,
         'notification' => \App\Http\Middleware\Notification::class,
         'email' => \App\Http\Middleware\Email::class,
+        'api_login' => \App\Http\Middleware\Api_login::class,
     ];
 }

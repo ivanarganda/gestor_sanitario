@@ -34,6 +34,7 @@ const checkboxes = document.querySelectorAll("#table-users tbody tr #actions .ch
 
 // Botones de contacto mis solicitudes
 const botones_nuevo_chat_administrador = document.querySelectorAll(".botones_nuevo_chat");
+const botones_contacto = document.querySelectorAll(".botones_contacto");
 
 // Chatbox 
 const chatBox = document.querySelector("#myChats");
@@ -65,6 +66,8 @@ const sendEmail = ( type , data ) => {
             window.location = '/request-changed/' + data.status + '/-1/';
         } else if ( type == 'masDetalles' ) {
             return true;
+        } else if ( type == 'keepContacting' ) {
+            return true;
         } else {
             console.log( data );
             window.location = '/contacted_with_administrator';
@@ -76,6 +79,8 @@ const sendEmail = ( type , data ) => {
             window.location = '/request-changed/' + data.status + '/' + error + '/';
         } else if ( type == 'masDetalles' ) {
             return true;
+        } else if ( type == 'keepContacting' ) {
+            return true;
         } else {
             console.log( data );
             window.location = '/contacted_with_administrator/error';
@@ -84,7 +89,7 @@ const sendEmail = ( type , data ) => {
     });
 }
 
-const openChatRoom = async( destinatary ) =>{
+const loadMessagesFromChatRoom = async (destinatary) => {
     try {
         let response = await fetch(`${window.location.protocol}//${window.location.host}/api/requestes/chatroom/in/${destinatary}`, {
             method: 'GET',
@@ -93,23 +98,22 @@ const openChatRoom = async( destinatary ) =>{
                 'Accept': 'application/json'
             }
         });
+
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
+
         let data = await response.json();
-        return new Promise((resolve) => {
-            resolve(data);
-        });
-        
+        return data;
+
     } catch (error) {
-        console.error('Error loading chatbox' + error);
-        return true;    
+        console.error('Error loading chatbox: ' + error);
+        return true;
     }
-    
 }
 
 // Open chatbox
-const openChatBox = async() => {
+const loadListChats = async () => {
     try {
         let response = await fetch(`${window.location.protocol}//${window.location.host}/api/requestes/chat/in`, {
             method: 'GET',
@@ -124,16 +128,188 @@ const openChatBox = async() => {
         }
 
         let data = await response.json();
-
-        return new Promise((resolve) => {
-            resolve(data);
-        });
+        return data;
 
     } catch (error) {
-        console.error('Error loading chatbox' + error);
+        console.error('Error loading chatbox: ' + error);
         return true;
     }
+};
+
+const buildChatRoom = async(destinatary)=>{
+    const data = await loadMessagesFromChatRoom(destinatary);
+
+    console.log( data );
+
+    let message_data = data.data;
+    let emisor_chat_room = $("#emisor_chat_room").text();
+    let name_emisor_chat_room = $("#name_emisor_chat_room").text();
+    let name_destinatary_chat_room = '';
+    let email_destinatary_chat_room = '';
+    let email_emisor_chat_room = '';
+
+    message_data.forEach(( message )=>{
+        if ( message.emisor == emisor_chat_room  ){
+            name_destinatary_chat_room = message.destinatary_name;
+            email_destinatary_chat_room = message.destinatary_email;
+            email_emisor_chat_room = message.emisor_email;
+        }
+    });
+
+    console.log( name_emisor_chat_room , name_destinatary_chat_room );
+    $('#title_chat_room').html(`Chat (${name_emisor_chat_room}<>${name_destinatary_chat_room})`);
+
+    let content = `<ul class="divide-y divide-gray-200">`;
+
+    if ( message_data.length == 0 ) {
+        content+= `<li class="p-4 hover:bg-gray-100 cursor-pointer flex items-center">
+            <div class="ml-3">
+                <p>No tienes ninguna conversacion</p>
+            </div>
+        </li>`;
+        content+= `</ul>`;
+        return content;
+    }
+
+    content+= `
+        <span hidden id="chat_room_emisor">${emisor_chat_room}</span>
+        <span hidden id="chat_room_request_id">${data.data[0].request_id}</span>
+        <span hidden id="chat_room_request_title">${data.data[0].request_title}</span>
+        <span hidden id="chat_room_destinatary">${destinatary}</span>
+        <span hidden id="chat_room_email_destinatary">${email_destinatary_chat_room}</span>
+        <span hidden id="chat_room_name_destinatary">${name_destinatary_chat_room}</span>
+        <span hidden id="email_emisor_chat_room">${email_emisor_chat_room}</span>
+        
+    `;
+
+    message_data.forEach(( message )=>{
+        let positionText = 'end';
+        if (emisor_chat_room == message.emisor) {
+            positionText = 'start';
+            message.emisor_name = 'Yo';
+        }
+
+        if ( message.emisor_name == message.destinatary_name ){
+            content+= `<li class="p-4 hover:bg-gray-100 cursor-pointer flex flex-col items-${positionText}">
+                <p class="text-sm font-medium text-gray-900">${message.emisor_email}</p>
+                <p class="text-sm text-gray-500">${message.message}</p>
+            </li>`; 
+        } else {
+            content+= `<li class="p-4 hover:bg-gray-100 cursor-pointer flex flex-col items-${positionText}">
+                <p class="text-sm font-medium text-gray-900">${message.emisor_name}</p>
+                <p class="text-sm text-gray-500">${message.message}</p>
+            </li>`;
+        }
+        
+    });
+    content+= `</ul>`;
+
+    return content;
+
 }
+
+const buildChat = async () => {
+    const chats = await loadListChats();
+    console.log( chats );
+    let content = `<ul class="list_chat divide-y divide-gray-200">`;
+
+    if ( chats.data.length == 0 ) {
+        content+= `<li class="p-4 hover:bg-gray-100 cursor-pointer flex items-center">
+            <div class="ml-3">
+                <p>No tienes chats</p>
+            </div>
+        </li>`;
+        content+= `</ul>`;
+        return content;
+    }
+
+    chats.data.forEach(( chat )=>{
+        content+= `<li id='${chat.destinatary}' class="p-4 hover:bg-gray-100 cursor-pointer flex items-center">
+            <div id='${chat.destinatary}' class="flex-shrink-0">
+                <img id='${chat.destinatary}' class="h-10 w-10 rounded-full" src="https://via.placeholder.com/40" alt="User Avatar">
+            </div>
+            <div id='${chat.destinatary}' class="ml-3">
+                <p id='${chat.destinatary}' class="text-sm font-medium text-gray-900">${chat.user_destinatary}</p>
+                <p id='${chat.destinatary}' class="text-sm text-gray-500">${chat.last_message}</p>
+            </div>
+        </li>`;
+    });
+    content+= `</ul>`;
+
+    return content;
+}
+
+let chatRoomInterval;
+let chatListInterval;
+
+const initializeChatRoom = async (id) => {
+    if (chatRoomInterval) {
+        clearInterval(chatRoomInterval);
+    }
+
+    // Clear previous chatRoomInterval if any
+    chatRoomInterval = setInterval(async () => {
+        const chatRoomContent = await buildChatRoom(id);
+        $('#loadMessagesChatRoom').html(chatRoomContent);
+
+        // Unbind any previous click handler before binding a new one
+        $("#boton_enviar_mensaje").off('click').on('click', () => {
+            let jsonData = {
+                request_id: $("#chat_room_request_id").text(),
+                type: 'contact',
+                email: $("#chat_room_email_destinatary").text(),
+                title: $("#chat_room_request_title").text(),
+                administrator_email: $("#chat_room_email_destinatary").text(),
+                administrator_name: $("#chat_room_name_destinatary").text(),
+                user_email: $("#email_emisor_chat_room").text(),
+                user_name: $("#name_emisor_chat_room").text(),
+                emisor: $("#emisor_chat_room").text(),
+                receptor: $("#chat_room_destinatary").text(),
+                message: $("#message_textarea_chat_room").val()
+            };
+
+            const data = new FormData();
+            data.append('data', JSON.stringify(jsonData));
+            fetch(window.location.protocol + '/api/myinbox/chat/create', {
+                method: 'POST',
+                body: data
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                sendEmail('keepContacting', jsonData);
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+
+            initializeChatRoom(id);
+        });
+
+    }, 800);
+};
+
+const initializeChat = async () => {
+    $('#loadChatsList').html(`<div class="w-full h-full flex flex-col mx-auto justify-center items-center"><span class="h-full mt-32">Loading...</span></div>`);
+
+    if (chatListInterval) {
+        clearInterval(chatListInterval);
+    }
+
+    chatListInterval = setInterval(async () => {
+        const chatContent = await buildChat();
+        $('#loadChatsList').html(chatContent);
+
+        const chats = document.querySelectorAll('.list_chat');
+        chats.forEach((chat) => {
+            chat.addEventListener('click', (e) => {
+                $('#chatRoom').show();
+                initializeChatRoom(e.target.id);
+            });
+        });
+    }, 3500);
+};
+
 
 // Cargar notificaciones
 const loadNotifications = async () => {
@@ -590,126 +766,30 @@ if ( chatBox ){
     $('#myChats').hide();
     $('#chatRoom').hide();
 
-    // $('#myChats').hide();
     const boton_chatbox = document.querySelector('#boton_chatbox');
     $(boton_chatbox).on('click',()=>{
         $('#myChats').fadeToggle();
-    });
-
-    openChatBox()
-    .then((data) => {
-        let json_data = data.data;
-        let content = `<div class="h-full w-full overflow-auto rounded-md">
-                    <div class="w-full h-full container mx-auto">
-            <div class="w-full h-full bg-white shadow-md rounded-lg overflow-hidden">`;
-        content+=`<div class="w-full flex flex-row justify-between p-4 border-b">
-                <h2 class="text-xl font-semibold text-gray-800">Chats</h2>
-                <span id='close_chat_box' class="text-xl font-semibold text-gray-800">x</h2>
-            </div><ul class="chats_li divide-y divide-gray-200">`
-        if (json_data.length === 0) {
-            content+=`<li class="p-4 hover:bg-gray-100 cursor-pointer flex items-center">No tienes chats</li>
-                    </ul>
-                    </div>
-                </div>
-            </div>`;
-            $('#myChats').html(`${content}`);
-            return false;
+        if ( $('#chatRoom').is(':visible') ){
+            $('#chatRoom').show();
+        } else {
+            $('#chatRoom').hide();
         }
-        json_data.forEach(( element )=>{
-            console.log( element );
-            content+=`<li id='${element.destinatary}' class="list_chats p-4 hover:bg-gray-100 cursor-pointer flex items-center">
-                <div id='${element.destinatary}' class="flex-shrink-0">
-                    <img id='${element.destinatary}' class="h-10 w-10 rounded-full" src="https://via.placeholder.com/40" alt="User Avatar">
-                </div>
-                <div id='${element.destinatary}' class="ml-3">
-                    <p id='${element.destinatary}' class="text-sm font-medium text-gray-900">${element.user_destinatary}(${element.email_destinatary})</p>
-                    <p id='${element.destinatary}' class="text-sm text-gray-500">${element.last_message}</p>
-                </div>
-            </li>`;
-        })
-        content+=`</ul></div>
-            </div>
-        </div>`;
-        $('#myChats').html(`${content}`);
-
-        $("#close_chat_box").on('click', ()=>{
-            $('#myChats').fadeOut();
-            $('#chatRoom').fadeOut();
-        }); 
-
-        const list_chats = document.querySelectorAll(".list_chats");
-        console.log( list_chats );
-        list_chats.forEach((list)=>{
-            $(list).on('click',( event )=>{
-                event.preventDefault();
-                let destinatary = event.target.id;
-                // Open a chat room
-                openChatRoom(destinatary)
-                .then(( data )=>{
-                    console.log( data );
-
-                    let json_data = data.data;
-                    let content = ``;
-                    let emisor = $("#emisor").text();
-                    content = `<div class="h-full w-full overflow-auto rounded-md">
-                        <div class="w-full h-full container mx-auto">
-                        <div class="w-full h-full bg-white shadow-md rounded-lg overflow-hidden">`;
-                    content+=`<div class="w-full flex flex-row justify-between p-4 border-b">
-                            <h2 class="text-xl font-semibold text-gray-800">${data.data[0].title}</h2>
-                            <span id="close_chat_room" class="text-xl font-semibold text-gray-800">x</h2>
-                        </div><ul class="flex flex-col space-y-8 divide-y divide-gray-200">`
-                    if (json_data.length === 0) {
-                        content+=`<li class="p-4 hover:bg-gray-100 cursor-pointer flex items-center">No tienes chats</li>
-                                </ul>
-                                </div>
-                            </div>
-                        </div>`;
-                        $('#chatRoom').html(`${content}`).fadeIn();
-                        return false;
-                    }
-                    
-                    json_data.forEach(( element )=>{
-                        let positionText = 'right';
-                        if ( emisor == element.destinatary ){
-                            positionText = 'left';
-                            element.user_destinatary = 'Yo';
-                        }
-                        console.log( element );
-                        content+=`<li lass="list_chats p-4 hover:bg-gray-100 cursor-pointer flex items-center">
-                            <div class="ml-3">
-                                <p class="text-${positionText} text-xs p${positionText[0]}-4 font-medium text-gray-500">${element.user_destinatary}</p>
-                                <p class="text-${positionText} text-sm p${positionText[0]}-4 font-medium text-gray-900">${element.message}</p>
-                            </div>
-                        </li>`;
-                    })
-                    content+=`
-                            </ul></div>
-                        </div>
-                    </div>
-                    <div class='w-full bg-white'>
-                    <hr />
-                        <textarea placeholder='Escribe un mensaje' rows='5' style="background:white" class='w-full rounded-md z-40'></textarea>
-                        <div class="flex flex-row justify-end">
-                            <span class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded focus:outline-none focus:shadow-outline">Enviar</span>
-                        </div>
-                    </div>`;
-
-                    $("#chatRoom").html(content).fadeIn();
-                    $("#close_chat_room").on('click', ()=>{
-                        $('#chatRoom').fadeOut();
-                    }); 
-                }) 
-                .catch(( error )=>{
-                    console.log( 'Error opening chat room', error );
-                });
-            })
-        });
-
+        
     });
+    $("#close_chat_box").on('click',()=>{
+        $('#myChats').fadeOut();
+        $('#chatRoom').fadeOut();
+    });
+
+    $("#close_chat_room").on('click',()=>{
+        $('#chatRoom').fadeOut();
+    });
+
+    initializeChat();
 
 }
 
-if ( botones_nuevo_chat_administrador  ){
+if ( botones_nuevo_chat_administrador || botones_contacto  ){
 
     botones_nuevo_chat_administrador.forEach(( boton )=>{
         $(boton).on('click',( event )=>{
@@ -792,5 +872,16 @@ if ( botones_nuevo_chat_administrador  ){
 
         });
     });
+
+    botones_contacto.forEach(( boton )=>{
+        $(boton).on('click',(event)=>{
+            let request_id = event.target.id;
+            let receptor = $(`#admin_id_${request_id}`).text();
+            console.log( receptor );
+            $('#chatRoom').show();
+            $('#myChats').show();
+            initializeChatRoom(receptor);
+        })
+    })
     
 }
