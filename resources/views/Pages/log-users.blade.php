@@ -1,7 +1,6 @@
 @include('../Layouts/header')
 @include('../Helpers/commonMethods')
-
-<div class="container mx-auto py-8">
+<div class="container mx-auto pt-40 py-8">
     @php
         echo generateTitleSection('Sesiones de usuarios');
     @endphp

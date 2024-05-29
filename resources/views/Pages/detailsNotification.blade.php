@@ -4,7 +4,7 @@
 @php 
     echo generateSidebar(['Trash','Lupe']);
 @endphp
-<div class="container mx-auto my-8">
+<div class="container pt-40 mx-auto my-8">
     <div class="bg-white shadow-md rounded-lg">
         <div class="flex flex-row justify-center space-x-5 items-center">
             <div class="mt-5">

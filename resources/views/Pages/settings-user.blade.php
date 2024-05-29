@@ -1,5 +1,9 @@
 @include('../Layouts/header')
-<div class="w-full h-full flex flex-col justify-center items-center">
+@include('../Helpers/commonMethods')
+<div class="w-full pt-40 h-full flex flex-col justify-center items-center">
+    @php
+        echo generateTitleSection('Configuracion de perfil');
+    @endphp
     <form method="POST" action="/settings/saveSettings/{{$data_user->id}}" class="max-w-2xl mt-20 w-full mb-8 bg-white p-8 rounded-lg shadow-md transition">
         @csrf
         <div class="grid grid-cols-1 gap-6 w-full">
