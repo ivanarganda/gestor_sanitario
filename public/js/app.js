@@ -200,6 +200,16 @@ const buildChatRoom = async(destinatary)=>{
     `;
 
     message_data.forEach(( message )=>{
+        let iconStatusMessage = `<svg class="h-5 w-5 text-gray-700"  width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" 
+        fill="none" stroke-linecap="round" stroke-linejoin="round">  <path stroke="none" d="M0 0h24v24H0z"/>  <path d="M7 12l5 5l10 -10" />  
+        <path d="M2 12l5 5m5 -5l5 -5" /></svg>`;
+
+        if ( message.viewed == '1' ){
+            iconStatusMessage = `<svg class="h-5 w-5 text-blue-700"  width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" 
+            fill="none" stroke-linecap="round" stroke-linejoin="round">  
+            <path stroke="none" d="M0 0h24v24H0z"/>  <path d="M7 12l5 5l10 -10" />  <path d="M2 12l5 5m5 -5l5 -5" /></svg>`;
+        }
+
         let positionText = 'end';
         if (emisor_chat_room == message.emisor) {
             positionText = 'start';
@@ -210,15 +220,18 @@ const buildChatRoom = async(destinatary)=>{
             content+= `<li class="p-4 hover:bg-gray-100 cursor-pointer flex flex-col items-${positionText}">
                 <p class="text-sm font-medium text-gray-900">${message.emisor_email}</p>
                 <p class="text-sm text-gray-500">${message.message}</p>
+                <p class="text-sm text-gray-500">${iconStatusMessage}</p>
             </li>`; 
         } else {
             content+= `<li class="p-4 hover:bg-gray-100 cursor-pointer flex flex-col items-${positionText}">
                 <p class="text-sm font-medium text-gray-900">${message.emisor_name}</p>
                 <p class="text-sm text-gray-500">${message.message}</p>
+                <p class="text-sm text-gray-500">${iconStatusMessage}</p>
             </li>`;
         }
         
     });
+    
     content+= `</ul>`;
 
     return content;
@@ -300,6 +313,7 @@ const initializeChatRoom = async (id) => {
             });
 
             initializeChatRoom(id);
+            $("#message_textarea_chat_room").val("");
         });
 
     }, 1500);

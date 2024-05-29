@@ -15,24 +15,24 @@
         </div>
     </div>
     <div id="chatRoom" class="absolute bottom-28 h-96 w-80 shadow-lg right-80 bg-gray-100 z-30 cursor-pointer">
-        <div class="h-full w-full overflow-auto rounded-md">
-            <div class="w-full h-full container mx-auto">
-                <div class="w-full h-full bg-white shadow-lg rounded-tr-lg rounded-tl-lg overflow-hidden">
-                    <div class="w-full flex flex-row justify-between p-4 border-b">
-                        <h2 id="title_chat_room" class="text-md font-semibold text-gray-800"></h2>
+        <div class="h-full w-full rounded-md">
+            <div class="w-full relative h-full container mx-auto">
+                <div class="w-full relative h-full bg-white shadow-lg rounded-tr-lg rounded-tl-lg overflow-auto">
+                    <div class="fixed flex z-40 bg-white flex-row justify-between space-x-2 p-4 border-b">
+                        <h2 id="title_chat_room" class="text-md font-semibold text-gray-700"></h2>
                         <span id='close_chat_room' class="text-xl font-semibold text-gray-800">x</h2>
                         <span hidden id="emisor_chat_room">{{Auth::user()->id}}</span>
                         <span hidden id="name_emisor_chat_room">{{Auth::user()->name}}</span>
                         <span hidden id="role_emisor_chat_room">{{Auth::user()->role}}</span>
                     </div>
-                    <div class="shadow-md h-full" id="loadMessagesChatRoom">
+                    <div class="shadow-md h-full mt-20" id="loadMessagesChatRoom">
                     </div>
                 </div>
             </div>
         </div>
         <div class="w-full shadow-md">
             <div class="w-full bg-gray-100 shadow-md">
-                <textarea placeholder="Escribe mensaje" class="w-full bg-gray-100 shadow-md" id="message_textarea_chat_room"></textarea>
+                <textarea placeholder="Escribe mensaje" class="w-full text-gray-700 font-semibold bg-gray-100 shadow-md" id="message_textarea_chat_room"></textarea>
             </div>
             <div class="w-full bg-gray-100 flex flex-row justify-between items-center">
                 <ul class="w-full flex flex-row justify-center space-x-2 p-1">
@@ -44,7 +44,9 @@
                 </ul>
                 <ul class="w-full flex flex-row justify-center space-x-2 p-1">
                     <li>
-                        <button id="boton_enviar_mensaje" class="p-1 bg-blue-400 hover:bg-blue-500 text-gray-100 rounded-md">Enviar</button>
+                        <button id="boton_enviar_mensaje" class="p-1 text-blue-600 rounded-md">
+                            <svg class="h-8 w-8 text-cyan-600"  width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">  <path stroke="none" d="M0 0h24v24H0z"/>  <line x1="10" y1="14" x2="21" y2="3" />  <path d="M21 3L14.5 21a.55 .55 0 0 1 -1 0L10 14L3 10.5a.55 .55 0 0 1 0 -1L21 3" /></svg>
+                        </button>
                     </li>
                 </ul>
             </div>
