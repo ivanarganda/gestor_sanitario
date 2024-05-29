@@ -39,6 +39,23 @@ const botones_contacto = document.querySelectorAll(".botones_contacto");
 // Chatbox 
 const chatBox = document.querySelector("#myChats");
 
+// Session of user
+const sessionUserRole = $("#sessionUserRole").text().trim();
+const sessionUserId = $("#sessionUserId").text().trim();
+
+// Handle and control session of user
+const handleControlSession = async( session_data )=>{
+    
+    const data = new FormData();
+    data.append('data', JSON.stringify(session_data));
+    const response = await fetch(window.location.protocol + '/api/checkSession', {
+        method: 'POST',
+        body: data
+    })
+    return response.json();
+
+}
+
 // Animación de carga
 const loadAnimation = (type, element, styles) => {
     if (type === "swing") {
@@ -885,3 +902,25 @@ if ( botones_nuevo_chat_administrador || botones_contacto  ){
     })
     
 }
+
+if ( sessionUserId || sessionUserRole ){
+
+    const data_session = {
+
+        sessionUserId:sessionUserId,
+        sessionUserRole:sessionUserRole
+
+    }
+
+    handleControlSession(data_session)
+    .then(( data )=>{
+        console.log( data );
+        // window.location = '/';
+    })
+    .catch(error => {
+        console.log(error);
+        // window.location = '/error';
+    });
+    
+}
+

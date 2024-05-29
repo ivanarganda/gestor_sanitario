@@ -25,6 +25,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 
 Route::get('/notifications/{id}', [NotificationController::class, 'getNotificationsAdmin'])->middleware('notification');
+Route::post('/checkSession', [UserController::class, 'checkSession']);
 Route::post('/sendEmail', [MailController::class, 'sendMail']);
 Route::post('/users', [UserController::class, 'checkUser']);
 Route::post('/users/changeStatus', [UserController::class, 'activateOrDeactivate']);

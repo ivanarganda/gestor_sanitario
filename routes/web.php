@@ -16,7 +16,7 @@ Route::get('/', function () {
 Route::middleware(['check.login'])->group(function () {
     Route::get('/users/{s?}', [UserController::class, 'getUsers'])->name('users');
     Route::get('/users/delete/{id}', [UserController::class, 'delete'])->name('delete');
-    Route::get('/users/settings', [UserController::class, 'settingsUser'])->name('settingsUser');
+    Route::get('/settings', [UserController::class, 'settingsUser']);
     Route::get('/send/{data}', [Controller::class, 'send']);
     Route::get('/send/{data}', [Controller::class, 'send']);
     Route::get('/user-registered/{error?}', [UserController::class, 'user_registered']);
@@ -40,3 +40,4 @@ Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::post('/users/create', [UserController::class, 'register']);
 Route::post('/form_request_credentials/create', [NotificationController::class, 'submit_request'])->name('submit_request');
 Route::post('/users/update/{id}', [UserController::class, 'update']);
+Route::post('/settings/saveSettings/{id}', [UserController::class, 'saveSettings']);

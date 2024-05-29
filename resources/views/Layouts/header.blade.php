@@ -16,6 +16,18 @@
 
 <body class="h-full min-h-screen bg-gray-100">
     <div class="flex flex-col mx-auto min-w-[350px]">
+        @auth
+            <span hidden id="sessionUserRole">
+                @php
+                    echo Auth::user()->role
+                @endphp
+            </span>
+            <span hidden id="sessionUserId">
+                @php
+                    echo Auth::user()->id
+                @endphp
+            </span>
+        @endauth
         <header
             class="flex items-center justify-between px-6 py-4 bg-gray-900 bg-opacity-80 shadow-xl w-full top-0 z-50 transition-all duration-500 ease-in-out">
             <div class="flex items-center space-x-3">

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Models\User;
@@ -210,6 +211,52 @@ class UserController extends Controller
 
         // Return the view with users and pagination data
         return view('Pages.gestion-usuarios', [ 'users' => $users, 'pagination' => $pagination , 'search' => $s ]);
+    }
+
+    public function saveSettings( Request $request , $id ){
+
+        try {
+            $user = User::findOrFail($id);
+
+            $user->fill($request->all());
+            $user->save();
+            return redirect()->back()->with(['success' => 'Settings saved successfully']);
+        } catch (QueryException $e) {
+            if (preg_match('/Integrity constraint violation: 1062 Duplicate entry/', $e->getMessage())) {
+                return redirect()->back()->with(['error' => 'Not settings saved due to another user with same email']);
+            } else {
+                return redirect()->back()->with(['error' => $e->getMessage()]);
+            }
+        
+        }
+
+    }
+
+    public function settingsUser(){
+
+        $data_user = User::where('email', Auth::user()->email)->first();
+
+        return view('Pages.settings-user', compact('data_user'));
+    }
+
+    public function checkSession( Request $request ){
+
+        $data = json_decode($request->input('data'));
+
+        $session = true;
+
+        $user = User::where('id', $data->sessionUserId)->first();
+
+        if ( $user->role != $data->sessionUserRole ){
+            $session = false;
+        }   
+    
+        return response()->json(
+            [
+               'data_session' => $data,
+               'session' => $session
+            ]
+        );
     }
         
 }
