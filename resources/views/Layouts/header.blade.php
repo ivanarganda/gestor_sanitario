@@ -14,8 +14,8 @@
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
 </head>
 
-<body class="h-full min-h-screen bg-gray-100">
-    <div class="flex flex-col mx-auto min-w-[350px]">
+<body class="bg-gray-100 dark:bg-gray-900 w-full flex flex-col items-center justify-center">
+    <div class="flex flex-col mx-auto min-w-[350px] w-full">
         @auth
             <span hidden id="sessionUserRole">
                 @php
