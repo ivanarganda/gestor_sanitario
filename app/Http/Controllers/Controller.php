@@ -348,24 +348,24 @@ class Controller extends BaseController
                 return $results;
         } else{
             // Subquery to get distinct destinatary for a given emisor
-            // $destinataryChats = DB::table('chatnotificationsrequest')
-            // ->select('destinatary')
-            // ->distinct()
-            // ->where('destinatary', $id);
-        
-            // // Main query
-            // $results = DB::table(DB::raw('(' . $destinataryChats->toSql() . ') as dc'))
-            // ->select(
-            //     'dc.destinatary', 
-            //     DB::raw('(select cr.message from chatnotificationsrequest cr where cr.destinatary = dc.destinatary order by cr.created_at desc limit 1) as last_message'),
-            //     DB::raw('(select u.name from users u where u.id = dc.destinatary) as user_destinatary'),
-            //     DB::raw('(select u.email from users u where u.id = dc.destinatary) as email_destinatary'),
-            //     DB::raw('(select cr.created_at from chatnotificationsrequest cr where cr.destinatary = dc.destinatary order by cr.created_at desc limit 1) as last_message_date')
-            // )
-            // ->mergeBindings($destinataryChats) // Merge bindings from the subquery
-            // ->get();
-        
-            // return $results;
+            $destinataryChats = DB::table('chatnotificationsrequest')
+            ->select('destinatary', 'emisor')
+            ->distinct()
+            ->where('destinatary', '=', $id);
+
+        // Consulta principal
+            $results = DB::table(DB::raw('(' . $destinataryChats->toSql() . ') as dc'))
+            ->mergeBindings($destinataryChats) // Merging bindings from the subquery
+            ->select(
+                'dc.destinatary as emisor',
+                'dc.emisor as destinatary',
+                DB::raw('(select cr.message from chatnotificationsrequest cr where cr.destinatary = dc.destinatary order by cr.created_at desc limit 1) as last_message'),
+                DB::raw('(select u.name from users u where u.id = dc.emisor) as user_destinatary'),
+                DB::raw('(select u.email from users u where u.id = dc.emisor) as email_destinatary'),
+                DB::raw('(select cr.created_at from chatnotificationsrequest cr where cr.destinatary = dc.destinatary order by cr.created_at desc limit 1) as last_message_date')
+            )
+            ->get();
+            return $results;
         }
     }
 

@@ -227,7 +227,6 @@ const buildChatRoom = async(destinatary)=>{
 
 const buildChat = async () => {
     const chats = await loadListChats();
-    console.log( chats );
     let content = `<ul class="list_chat divide-y divide-gray-200">`;
 
     if ( chats.data.length == 0 ) {

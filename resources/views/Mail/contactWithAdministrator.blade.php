@@ -77,9 +77,6 @@
 </head>
 <body>
     <div class="container">
-        <h3>Hola {{$data->administrator_name}} este mensaje es para ti:</h3>
-        <h4><span class="capitalize">{{$data->user_name}}</span>({{$data->user_email}}) te ha escrito este mensaje</h4>
-        <h4><span class="capitalize">{{$data->title}}</span></h4>
         <div class="header">
             <p>{{$data->message}}</p>
         </div>

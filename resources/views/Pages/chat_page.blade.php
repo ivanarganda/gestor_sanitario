@@ -23,6 +23,7 @@
                         <span id='close_chat_room' class="text-xl font-semibold text-gray-800">x</h2>
                         <span hidden id="emisor_chat_room">{{Auth::user()->id}}</span>
                         <span hidden id="name_emisor_chat_room">{{Auth::user()->name}}</span>
+                        <span hidden id="role_emisor_chat_room">{{Auth::user()->role}}</span>
                     </div>
                     <div class="shadow-md h-full" id="loadMessagesChatRoom">
                     </div>
