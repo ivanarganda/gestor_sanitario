@@ -286,7 +286,7 @@ const initializeChatRoom = async (id) => {
             initializeChatRoom(id);
         });
 
-    }, 800);
+    }, 1500);
 };
 
 const initializeChat = async () => {

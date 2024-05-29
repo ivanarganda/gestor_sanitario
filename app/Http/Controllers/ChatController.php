@@ -49,7 +49,7 @@ class ChatController extends Controller
 
     public function generateChatList(  $id = null ){
 
-        $results = $this->getChatList(Auth::user()->id);
+        $results = $this->getChatList(Auth::user()->id,Auth::user()->role);
         return response()->json([
             'data' => $results,
             'msg' => 'Successfully changed'

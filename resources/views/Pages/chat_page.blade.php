@@ -1,5 +1,3 @@
-<span hidden id="emisor_chat_room">{{Auth::user()->id}}</span>
-<span hidden id="name_emisor_chat_room">{{Auth::user()->name}}</span>
 <div class="fixed cursor-pointer bottom-0 w-20 h-20 right-10 z-10 h-20 w-20 text-gray-700">
     <div id="myChats" class="absolute bottom-28 h-96 w-80 shadow-lg -right-2 bg-gray-100 z-30 cursor-pointer">
         <div class="h-full w-full overflow-auto rounded-md">
@@ -23,6 +21,8 @@
                     <div class="w-full flex flex-row justify-between p-4 border-b">
                         <h2 id="title_chat_room" class="text-md font-semibold text-gray-800"></h2>
                         <span id='close_chat_room' class="text-xl font-semibold text-gray-800">x</h2>
+                        <span hidden id="emisor_chat_room">{{Auth::user()->id}}</span>
+                        <span hidden id="name_emisor_chat_room">{{Auth::user()->name}}</span>
                     </div>
                     <div class="shadow-md h-full" id="loadMessagesChatRoom">
                     </div>
