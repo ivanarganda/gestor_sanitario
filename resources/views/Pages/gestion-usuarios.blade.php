@@ -21,7 +21,7 @@
         return $email === Auth::user()->email;
     }
 @endphp
-<div class="container pt-40 mx-auto py-8">
+<div class="container pt-20 xl:pt-40 mx-auto py-8">
     @php
         echo generateTitleSection('Gestion de usuarios');
     @endphp

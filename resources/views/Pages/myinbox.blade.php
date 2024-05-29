@@ -4,7 +4,7 @@
 @php 
     echo generateSidebar(['Trash', 'Lupe']);
 @endphp
-<div class="relative container pt-20 mx-auto my-8">
+<div class="relative container pt-10 xl:pt-20 mx-auto my-8">
     <div id="modalBackdrop_contact_administrator">
     </div>
     @include('Pages.chat_page')
