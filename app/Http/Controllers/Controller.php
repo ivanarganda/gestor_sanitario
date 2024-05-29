@@ -353,9 +353,8 @@ class Controller extends BaseController
             ->distinct()
             ->where('destinatary', '=', $id);
 
-        // Consulta principal
             $results = DB::table(DB::raw('(' . $destinataryChats->toSql() . ') as dc'))
-            ->mergeBindings($destinataryChats) // Merging bindings from the subquery
+            ->mergeBindings($destinataryChats)
             ->select(
                 'dc.destinatary as emisor',
                 'dc.emisor as destinatary',
