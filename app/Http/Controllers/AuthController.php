@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use App\Events\RemoteLogout;
+use GuzzleHttp\Client;
 
 class AuthController extends Controller
 {
@@ -140,6 +142,23 @@ class AuthController extends Controller
 
         // Redirect to the intended location or the homepage.
         return redirect()->intended('/');
+    }
+
+    public function remoteLogout(Request $request)
+    {
+        $userId = $request->input('user_id');
+
+        $client = new Client();
+        $response = $client->post('http://localhost:6001', [
+            'json' => [
+                'event' => 'logout',
+                'data' => [
+                    'userId' => $userId
+                ]
+            ]
+        ]);
+    
+        return response()->json(['status' => 'ok']);
     }
 
 }
