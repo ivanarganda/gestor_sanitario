@@ -65,4 +65,35 @@ class ChatController extends Controller
             'msg' => 'Successfully created'
         ]);
     }
+
+    public function getNotificationsNewMessages( $id ){
+        try {
+            $notificatons = $this->getNotificationsNewMessages_api( $id );
+            return response()->json([
+                'notifications' => $notificatons,
+                'success' => true,
+                'message' => 'Notifications fetched successfully'
+            ]);
+
+        } catch ( QueryException $e ){
+
+            Log::info( $e->getMessage(), LOG_DEBUG );
+            return response()->json([
+               'notifications' => -1,
+               'success' => false,
+               'message' => $e->getMessage()
+            ]);
+        }
+    }
+
+    public function setAsViewed( Request $request ){
+        DB::table('chatnotificationsrequest')
+        ->where('viewed', '0')
+        ->where('emisor', $request->input('destinatary'))
+        ->where('destinatary', Auth::user()->id)
+        ->update(['viewed' => '1']);
+        return response()->json([
+           'msg' => 'Successfully set'
+        ]);
+    }
 }

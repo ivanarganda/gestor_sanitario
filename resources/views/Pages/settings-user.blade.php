@@ -1,6 +1,6 @@
 @include('../Layouts/header')
 @include('../Helpers/commonMethods')
-<div class="w-full pt-20 xl:pt-40 h-full flex flex-col justify-center items-center">
+<div class="w-full h-full flex flex-col justify-center items-center">
     @php
         echo generateTitleSection('Configuracion de perfil');
     @endphp

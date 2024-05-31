@@ -1,7 +1,7 @@
 @include('../Layouts/header')
 @include('../Helpers/commonMethods')
 
-<div class="w-3/4 m-auto pt-20 xl:pt-40">
+<div class="w-3/4 m-auto xl:pt-40">
     <div class="bg-gray-100 space-x-2 rounded-md w-full flex flex-row justify-center">
         <div>
            @php

@@ -4,7 +4,7 @@
 @php 
     echo generateSidebar(['Trash', 'Lupe']);
 @endphp
-<div class="container pt-20 xl:pt-40 mx-auto my-8">
+<div class="container mx-auto my-8">
     <div id="modalBackdrop_confirm_deleete_solicitud">
     </div>
     @include('Pages.chat_page')

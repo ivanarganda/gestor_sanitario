@@ -181,7 +181,7 @@ class Controller extends BaseController
             ->select(DB::raw("CONCAT(Q1.administrator_email, '(', Q1.administrator_email, ')') AS administrator_fullname"))
             ->selectRaw("COUNT(*) AS notifications")
             ->groupBy('Q1.administrator_id')
-            ->get();
+            ->count();
 
         return $results;
 
@@ -329,7 +329,7 @@ class Controller extends BaseController
     public function getChatList($id,$role) {
         if ( $role != 'staff' ){
                 $destinataryChats = DB::table('chatnotificationsrequest')
-                    ->select('destinatary')
+                    ->select('destinatary', 'emisor')
                     ->distinct()
                     ->where('emisor', $id);
             
@@ -337,10 +337,10 @@ class Controller extends BaseController
                 $results = DB::table(DB::raw('(' . $destinataryChats->toSql() . ') as dc'))
                 ->select(
                     'dc.destinatary', 
-                    DB::raw('(select cr.message from chatnotificationsrequest cr where cr.destinatary = dc.destinatary order by cr.created_at desc limit 1) as last_message'),
+                    DB::raw('(select cr.message from chatnotificationsrequest cr where cr.emisor = dc.emisor and cr.destinatary = dc.destinatary order by cr.created_at desc limit 1) as last_message'),
                     DB::raw('(select u.name from users u where u.id = dc.destinatary) as user_destinatary'),
                     DB::raw('(select u.email from users u where u.id = dc.destinatary) as email_destinatary'),
-                    DB::raw('(select cr.created_at from chatnotificationsrequest cr where cr.destinatary = dc.destinatary order by cr.created_at desc limit 1) as last_message_date')
+                    DB::raw('(select cr.created_at from chatnotificationsrequest cr where cr.emisor = dc.emisor and cr.destinatary = dc.destinatary order by cr.created_at desc limit 1) as last_message_date')
                 )
                 ->mergeBindings($destinataryChats) // Merge bindings from the subquery
                 ->get();
@@ -358,10 +358,10 @@ class Controller extends BaseController
             ->select(
                 'dc.destinatary as emisor',
                 'dc.emisor as destinatary',
-                DB::raw('(select cr.message from chatnotificationsrequest cr where cr.destinatary = dc.destinatary order by cr.created_at desc limit 1) as last_message'),
+                DB::raw('(select cr.message from chatnotificationsrequest cr where cr.destinatary = dc.destinatary and cr.emisor = dc.emisor order by cr.created_at desc limit 1) as last_message'),
                 DB::raw('(select u.name from users u where u.id = dc.emisor) as user_destinatary'),
                 DB::raw('(select u.email from users u where u.id = dc.emisor) as email_destinatary'),
-                DB::raw('(select cr.created_at from chatnotificationsrequest cr where cr.destinatary = dc.destinatary order by cr.created_at desc limit 1) as last_message_date')
+                DB::raw('(select cr.created_at from chatnotificationsrequest cr where cr.destinatary = dc.destinatary and cr.emisor = dc.emisor order by cr.created_at desc limit 1) as last_message_date')
             )
             ->get();
             return $results;
@@ -400,6 +400,14 @@ class Controller extends BaseController
 
         return $results;
 
+    }
+
+    public function getNotificationsNewMessages_api( $id ){
+        $newMessages = DB::table('chatnotificationsrequest')
+        ->where('viewed', '0')
+        ->where('destinatary', $id)
+        ->count();
+        return $newMessages;
     }
     
 }

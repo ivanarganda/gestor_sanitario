@@ -37,6 +37,8 @@ Route::post('/inbox/multiplerestaure', [NotificationController::class, 'multiple
 Route::post('/myinbox/chat/create', [ChatController::class, 'createchat']);
 Route::get('/requestes/chat/in/{id?}', [ChatController::class, 'generateChatList']);
 Route::get('/requestes/chatroom/in/{id?}', [ChatController::class, 'generateChatRoom']);
+Route::post('/chatroom/idx/in', [ChatController::class, 'setAsViewed']);
+Route::get('/chat/idx/in/{id}', [ChatController::class, 'getNotificationsNewMessages'])->middleware('notification');
 
 
 

@@ -29,6 +29,27 @@ function generateTitleSection( $title , $url = '' ){
 
 }
 
+function generateBadgetNotification( $type , $resized = [] ){
+    if ( count($resized) == 0 ){
+        $w = 16;
+        $h = 16;
+        $right = 40;
+        $text = 'lg';
+    } else {
+        $w = $resized['width'];
+        $h = $resized['height'];
+        $right = $resized['right'];
+        $text = $resized['text'];
+    }
+
+    return '<span id="badget_notification_'.$type.'" class="absolute top-0 right-'.$right.' inline-flex items-center p-3 text-sm font-medium text-center text-white rounded-lg focus:ring-4 focus:outline-none">
+        <xbutton class="relative">
+            <span id="badget_id">'.Auth::user()->id.'</span>
+            <div id="badget_text_notification_'.$type.'" class="absolute inline-flex items-center justify-center w-'.$w.' h-'.$h.' text-'.$text.' font-bold text-white bg-red-500 border-2 border-white rounded-full -top-2 -end-2 dark:border-gray-900"></div>
+        </xbutton>
+    </span>';
+}
+
 function mapearEstadoSolicitud( $status ){
 
     $status_ = [

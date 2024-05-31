@@ -1,3 +1,4 @@
+@include('Helpers/commonMethods')
 <section class="w-4/5 mx-auto flex flex-col items-center bg-gray-100 bg-opacity-80 p-6 rounded-lg shadow-md">
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8 w-full">
         {{-- Only admin --}}
@@ -46,12 +47,7 @@
                         </svg>
                     </figure>
                     <span class="text-lg font-semibold group-hover:text-blue-500 transition-colors duration-300">NOTIFICACIONES</span>
-                    <span id="badget_notification" class="absolute top-0 right-40 inline-flex items-center p-3 text-sm font-medium text-center text-white rounded-lg focus:ring-4 focus:outline-none">
-                        <xbutton class="relative">
-                            <span id="badget_id_admin">{{Auth::user()->id}}</span>
-                            <div id="badget_text_notification" class="absolute inline-flex items-center justify-center w-16 h-16 text-lg font-bold text-white bg-red-500 border-2 border-white rounded-full -top-2 -end-2 dark:border-gray-900"></div>
-                        </xbutton>
-                    </span>
+                    {!!generateBadgetNotification('request')!!}
                 </article>
             </a>
             <a href="{{url('/settings')}}">

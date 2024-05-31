@@ -17,8 +17,10 @@ const boton_abrir_modal_crear_usuario = document.querySelector("#addUser");
 const boton_cerrar_modal_crear_usuario = document.querySelector("#modal_boton_cancelar");
 
 // Notificaciones badge solicitud credenciales administrador
-const badget_notification = document.querySelector("#badget_notification");
-const badget_text_notification = document.querySelector("#badget_text_notification");
+const badget_notification_request = document.querySelector("#badget_notification_request");
+const badget_text_notification_request = document.querySelector("#badget_text_notification_request");
+const badget_notification_chat = document.querySelector("#badget_notification_chat");
+const badget_text_notification_chat = document.querySelector("#badget_text_notification_chat");
 
 // Botones de las solicitudes (Mas detalles, aprobar o denegar)
 const botones_accion_detalles_notificacion = document.querySelectorAll("#botones_accion_detalles_notificacion");
@@ -38,10 +40,22 @@ const botones_contacto = document.querySelectorAll(".botones_contacto");
 
 // Chatbox 
 const chatBox = document.querySelector("#myChats");
+let listeningMessages = false;
 
 // Session of user
 const sessionUserRole = $("#sessionUserRole").text().trim();
 const sessionUserId = $("#sessionUserId").text().trim();
+const abortController = new AbortController();
+const signal = abortController.signal;
+
+// Detecr Browser close
+const detectBrowserClose = () => {
+    window.addEventListener('unload', () => {
+        listeningMessages = false;
+        fetch(window.location.protocol + '/api/chatroom/idx/in', { signal , method : 'POST' , body: '' })
+        abortController.abort();
+    });
+}
 
 // Handle and control session of user
 const handleControlSession = async( session_data )=>{
@@ -204,7 +218,7 @@ const buildChatRoom = async(destinatary)=>{
         fill="none" stroke-linecap="round" stroke-linejoin="round">  <path stroke="none" d="M0 0h24v24H0z"/>  <path d="M7 12l5 5l10 -10" />  
         <path d="M2 12l5 5m5 -5l5 -5" /></svg>`;
 
-        if ( message.viewed == '1' ){
+        if ( message.viewed == '1' && emisor_chat_room == message.emisor ){
             iconStatusMessage = `<svg class="h-5 w-5 text-blue-700"  width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" 
             fill="none" stroke-linecap="round" stroke-linejoin="round">  
             <path stroke="none" d="M0 0h24v24H0z"/>  <path d="M7 12l5 5l10 -10" />  <path d="M2 12l5 5m5 -5l5 -5" /></svg>`;
@@ -214,6 +228,10 @@ const buildChatRoom = async(destinatary)=>{
         if (emisor_chat_room == message.emisor) {
             positionText = 'start';
             message.emisor_name = 'Yo';
+        }
+
+        if ( emisor_chat_room != message.emisor ){
+            iconStatusMessage = ``;
         }
 
         if ( message.emisor_name == message.destinatary_name ){
@@ -280,6 +298,20 @@ const initializeChatRoom = async (id) => {
     chatRoomInterval = setInterval(async () => {
         const chatRoomContent = await buildChatRoom(id);
         $('#loadMessagesChatRoom').html(chatRoomContent);
+        
+        if ( listeningMessages ){
+            const data_ = new FormData();
+            data_.append('destinatary', $("#chat_room_destinatary").text());
+            fetch(window.location.protocol + '/api/chatroom/idx/in', { signal , method : 'POST' , body: data_ })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                listeningMessages = false;
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+        }
 
         // Unbind any previous click handler before binding a new one
         $("#boton_enviar_mensaje").off('click').on('click', () => {
@@ -334,17 +366,24 @@ const initializeChat = async () => {
         chats.forEach((chat) => {
             chat.addEventListener('click', (e) => {
                 $('#chatRoom').show();
+                listeningMessages = true;
                 initializeChatRoom(e.target.id);
             });
         });
+        console.log( 'Listening messages....' , listeningMessages );
     }, 3500);
 };
 
 
 // Cargar notificaciones
-const loadNotifications = async () => {
+const loadNotifications = async ( type ) => {
+    console.log( type );
+    const urls = {
+        'request': `${window.location.protocol}//${window.location.host}/api/notifications/${$("#badget_id").text()}`,
+        'chat': `${window.location.protocol}//${window.location.host}/api/chat/idx/in/${$("#badget_id").text()}`,
+    }
     try {
-        let response = await fetch(`${window.location.protocol}//${window.location.host}/api/notifications/${$("#badget_id_admin").text()}`, {
+        let response = await fetch(`${urls[type]}`, {
             method: 'GET',
             mode: 'cors',
             headers: {
@@ -361,16 +400,18 @@ const loadNotifications = async () => {
         new Promise((resolve) => {
             resolve(data);
         }).then((data) => {
-            if (badget_text_notification) {
-                console.log(data);
-                if (data.notifications[0]?.notifications === 0 || data.notifications.length === 0) {
-                    $(badget_notification).hide();
+            if (badget_text_notification_request || badget_text_notification_chat) {
+                if (data.notifications === 0) {
+                    $(badget_notification_request).hide();
+                    $(badget_notification_chat).hide();
                 } else {
-                    $(badget_notification).show();
-                    $(badget_text_notification).html(data.notifications[0]?.notifications);
+                    $(badget_notification_request).show();
+                    $(badget_notification_chat).show();
+                    $(badget_text_notification_request).html(data.notifications);
+                    $(badget_text_notification_chat).html(data.notifications);
                 }
             } else {
-                console.error("Element with ID 'badget_notification' not found.");
+                console.error("Element with ID 'badget_notification_request' not found.");
             }
         });
     } catch (error) {
@@ -513,17 +554,27 @@ checkboxes.forEach((checkbox) => {
 });
 
 // Cargar notificaciones de administrador
-if (badget_notification) {
+if (badget_notification_request) {
     let firstLoad = true;
     if ( firstLoad ){
         firstLoad = false;
-        loadNotifications()
+        loadNotifications('request')
     } 
-    setInterval(() => loadNotifications(), 3500);
+    setInterval(() => loadNotifications('request'), 3500);
 
     setTimeout(()=>{
         window.location.reload();
     }, 35000)
+}
+
+if (badget_notification_chat) {
+    let firstLoad = true;
+    if ( firstLoad ){
+        firstLoad = false;
+        loadNotifications('chat')
+    } 
+    setInterval(() => loadNotifications('chat'), 3500);
+
 }
 
 // Mapear acciones de botones de notificaciones
@@ -799,9 +850,11 @@ if ( chatBox ){
     const boton_chatbox = document.querySelector('#boton_chatbox');
     $(boton_chatbox).on('click',()=>{
         $('#myChats').fadeToggle();
+        
+        if ( !$('#chatRoom').is(':visible') ){
+            clearInterval(chatRoomInterval);
+        }
         if ( $('#chatRoom').is(':visible') ){
-            $('#chatRoom').show();
-        } else {
             $('#chatRoom').hide();
         }
         
@@ -809,10 +862,16 @@ if ( chatBox ){
     $("#close_chat_box").on('click',()=>{
         $('#myChats').fadeOut();
         $('#chatRoom').fadeOut();
+        listeningMessages = false;
+        clearInterval(chatRoomInterval);
+        clearInterval(chatListInterval);
+
     });
 
     $("#close_chat_room").on('click',()=>{
         $('#chatRoom').fadeOut();
+        listeningMessages = false;
+        clearInterval(chatRoomInterval);
     });
 
     initializeChat();
@@ -936,4 +995,3 @@ if ( sessionUserId || sessionUserRole ){
     });
     
 }
-
