@@ -377,6 +377,7 @@ class Controller extends BaseController
                 DB::raw('(SELECT u.name FROM users u WHERE u.id = cr.destinatary) as destinatary_name'),
                 DB::raw('(SELECT u.email FROM users u WHERE u.id = cr.destinatary) as destinatary_email'),
                 DB::raw('(SELECT rn.title FROM requestnotifications rn WHERE rn.id = cr.request_id) as request_title'),
+                'cr.id',
                 'cr.emisor',
                 'cr.destinatary',
                 'cr.message',

@@ -167,10 +167,12 @@ const loadListChats = async () => {
     }
 };
 
-const buildChatRoom = async(destinatary)=>{
+let socket;
+
+const buildChatRoom = async (destinatary) => {
     const data = await loadMessagesFromChatRoom(destinatary);
 
-    console.log( data );
+    console.log(data);
 
     let message_data = data.data;
     let emisor_chat_room = $("#emisor_chat_room").text();
@@ -179,30 +181,30 @@ const buildChatRoom = async(destinatary)=>{
     let email_destinatary_chat_room = '';
     let email_emisor_chat_room = '';
 
-    message_data.forEach(( message )=>{
-        if ( message.emisor == emisor_chat_room  ){
+    message_data.forEach((message) => {
+        if (message.emisor == emisor_chat_room) {
             name_destinatary_chat_room = message.destinatary_name;
             email_destinatary_chat_room = message.destinatary_email;
             email_emisor_chat_room = message.emisor_email;
         }
     });
 
-    console.log( name_emisor_chat_room , name_destinatary_chat_room );
-    $('#title_chat_room').html(`Chat (${name_emisor_chat_room}<>${name_destinatary_chat_room})`);
+    console.log(name_emisor_chat_room, name_destinatary_chat_room);
+    $('#title_chat_room').html(`Chat`);
 
-    let content = `<ul class="divide-y divide-gray-200">`;
+    let content = `<ul class="messages_chat_room divide-y divide-gray-200">`;
 
-    if ( message_data.length == 0 ) {
-        content+= `<li class="p-4 hover:bg-gray-100 cursor-pointer flex items-center">
+    if (message_data.length == 0) {
+        content += `<li class="p-4 hover:bg-gray-100 cursor-pointer flex items-center">
             <div class="ml-3">
                 <p>No tienes ninguna conversacion</p>
             </div>
         </li>`;
-        content+= `</ul>`;
+        content += `</ul>`;
         return content;
     }
 
-    content+= `
+    content += `
         <span hidden id="chat_room_emisor">${emisor_chat_room}</span>
         <span hidden id="chat_room_request_id">${data.data[0].request_id}</span>
         <span hidden id="chat_room_request_title">${data.data[0].request_title}</span>
@@ -210,17 +212,35 @@ const buildChatRoom = async(destinatary)=>{
         <span hidden id="chat_room_email_destinatary">${email_destinatary_chat_room}</span>
         <span hidden id="chat_room_name_destinatary">${name_destinatary_chat_room}</span>
         <span hidden id="email_emisor_chat_room">${email_emisor_chat_room}</span>
-        
     `;
 
-    message_data.forEach(( message )=>{
-        let iconStatusMessage = `<svg class="h-5 w-5 text-gray-700"  width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" 
-        fill="none" stroke-linecap="round" stroke-linejoin="round">  <path stroke="none" d="M0 0h24v24H0z"/>  <path d="M7 12l5 5l10 -10" />  
+    message_data.forEach((message) => {
+
+        let key_data = {
+            id: message.id,
+            request_id: message.request_id,
+            request_title: message.request_title,
+            emisor: message.emisor,
+            emisor_name: message.emisor_name,
+            destinatary: message.destinatary,
+            destinatary_name: message.destinatary_name,
+            message: message.message,
+            viewed: message.viewed,
+            emisor_email: message.emisor_email,
+            destinatary_email: message.destinatary_email,
+            created_at: message.created_at,
+            updated_at: message.updated_at,
+        };
+
+        key_data = JSON.stringify(key_data)
+
+        let iconStatusMessage = `<svg class="h-5 w-5 text-gray-700" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+        fill="none" stroke-linecap="round" stroke-linejoin="round">  <path stroke="none" d="M0 0h24v24H0z"/>  <path d="M7 12l5 5l10 -10" />
         <path d="M2 12l5 5m5 -5l5 -5" /></svg>`;
 
-        if ( message.viewed == '1' && emisor_chat_room == message.emisor ){
-            iconStatusMessage = `<svg class="h-5 w-5 text-blue-700"  width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" 
-            fill="none" stroke-linecap="round" stroke-linejoin="round">  
+        if (message.viewed == '1' && emisor_chat_room == message.emisor) {
+            iconStatusMessage = `<svg class="h-5 w-5 text-blue-700" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+            fill="none" stroke-linecap="round" stroke-linejoin="round">
             <path stroke="none" d="M0 0h24v24H0z"/>  <path d="M7 12l5 5l10 -10" />  <path d="M2 12l5 5m5 -5l5 -5" /></svg>`;
         }
 
@@ -230,31 +250,32 @@ const buildChatRoom = async(destinatary)=>{
             message.emisor_name = 'Yo';
         }
 
-        if ( emisor_chat_room != message.emisor ){
+        if (emisor_chat_room != message.emisor) {
             iconStatusMessage = ``;
         }
 
-        if ( message.emisor_name == message.destinatary_name ){
-            content+= `<li class="p-4 hover:bg-gray-100 cursor-pointer flex flex-col items-${positionText}">
-                <p class="text-sm font-medium text-gray-900">${message.emisor_email}</p>
-                <p class="text-sm text-gray-500">${message.message}</p>
-                <p class="text-sm text-gray-500">${iconStatusMessage}</p>
-            </li>`; 
-        } else {
-            content+= `<li class="p-4 hover:bg-gray-100 cursor-pointer flex flex-col items-${positionText}">
-                <p class="text-sm font-medium text-gray-900">${message.emisor_name}</p>
-                <p class="text-sm text-gray-500">${message.message}</p>
-                <p class="text-sm text-gray-500">${iconStatusMessage}</p>
-            </li>`;
+        let checkbox_messages = `<input hidden type="checkbox" id="${message.id}" value="${key_data}/>`;
+
+        if (message.emisor_name == message.destinatary_name) {
+            message.emisor_name = message.emisor_email;
         }
-        
+        content += `<li id="${key_data}" class="p-4 hover:bg-gray-100 cursor-pointer flex flex-col items-${positionText}">
+                    ${checkbox_messages}
+                    <label for="${message.id}">
+                        <p class="text-sm font-medium text-gray-900">${message.emisor_name}</p>
+                        <p class="text-sm text-gray-500">${message.message}</p>
+                        <p class="text-sm text-gray-500">${iconStatusMessage}</p>
+                    </label>
+            </li>`;
     });
-    
-    content+= `</ul>`;
+
+    content += `</ul>`;
 
     return content;
+};
 
-}
+
+
 
 const buildChat = async () => {
     const chats = await loadListChats();
@@ -295,14 +316,23 @@ const initializeChatRoom = async (id) => {
     }
 
     // Clear previous chatRoomInterval if any
-    chatRoomInterval = setInterval(async () => {
+    $('#loadMessagesChatRoom').html(`<div class="loader flex flex-row justify-center items-center"></div>`);
+
+    // Establish WebSocket connection
+    socket = new WebSocket(`ws://${window.location.hostname}:8080`); // Adjust the URL to your WebSocket server
+
+    socket.onmessage = async (event) => {
         const chatRoomContent = await buildChatRoom(id);
         $('#loadMessagesChatRoom').html(chatRoomContent);
-        
-        if ( listeningMessages ){
-            const data_ = new FormData();
-            data_.append('destinatary', $("#chat_room_destinatary").text());
-            fetch(window.location.protocol + '/api/chatroom/idx/in', { signal , method : 'POST' , body: data_ })
+    };
+
+    socket.onopen = async () => {
+        const chatRoomContent = await buildChatRoom(id);
+        $('#loadMessagesChatRoom').html(chatRoomContent);
+
+        const data_ = new FormData();
+        data_.append('destinatary', $("#chat_room_destinatary").text());
+        fetch(window.location.protocol + '/api/chatroom/idx/in', { signal, method: 'POST', body: data_ })
             .then(response => response.json())
             .then(data => {
                 console.log(data);
@@ -311,7 +341,9 @@ const initializeChatRoom = async (id) => {
             .catch((error) => {
                 console.log(error);
             });
-        }
+
+        const checkboxes_messages_chat_room = $(".messages_chat_room li checkbox");
+        console.log( checkboxes_messages_chat_room );
 
         // Unbind any previous click handler before binding a new one
         $("#boton_enviar_mensaje").off('click').on('click', () => {
@@ -339,26 +371,26 @@ const initializeChatRoom = async (id) => {
             .then(data => {
                 console.log(data);
                 sendEmail('keepContacting', jsonData);
+                // Send message through WebSocket
+                socket.send(JSON.stringify(jsonData));
             })
             .catch((error) => {
                 console.log(error);
             });
 
-            initializeChatRoom(id);
             $("#message_textarea_chat_room").val("");
         });
-
-    }, 1500);
+    };
 };
 
 const initializeChat = async () => {
-    $('#loadChatsList').html(`<div class="w-full h-full flex flex-col mx-auto justify-center items-center"><span class="h-full mt-32">Loading...</span></div>`);
+    $('#loadChatsList').html(`<div class="loader"></div>`);
 
     if (chatListInterval) {
         clearInterval(chatListInterval);
     }
 
-    chatListInterval = setInterval(async () => {
+    // chatListInterval = setInterval(async () => {
         const chatContent = await buildChat();
         $('#loadChatsList').html(chatContent);
 
@@ -371,7 +403,7 @@ const initializeChat = async () => {
             });
         });
         console.log( 'Listening messages....' , listeningMessages );
-    }, 3500);
+    // }, 3500);
 };
 
 
